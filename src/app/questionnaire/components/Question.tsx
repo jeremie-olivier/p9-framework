@@ -2,15 +2,7 @@
 
 import React from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
-
-export interface QuestionProps {
-  id: string;
-  text: string;
-  value: number; // 0 = no answer yet
-  onChange: (id: string, value: number) => void;
-  disabled?: boolean;
-  outlined?: boolean;
-}
+import { QuestionProps } from "../types";
 
 const ticks = [
   { value: 1, label: "Strongly Disagree" },

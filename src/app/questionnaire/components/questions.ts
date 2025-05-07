@@ -1,11 +1,4 @@
-import { Dimension } from "@/lib/archetypeCentroids";
-
-export interface Question {
-  id: string;
-  text: string;
-  dimension: Dimension | "Analytical" | "Pragmatic" | "Strategic" | "Intrinsic" | "Extrinsic" | "Values";
-  reverse?: boolean;
-}
+import { Question } from "../types";
 
 export const questions: Question[] = [
   // --- HEXACO Traits (4 items each) ---

@@ -5,16 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { computeProfile, computeDimensionAverages } from "@/lib/scoring";
 import DimensionRadar from "@/components/DimensionRadar";
 import PracticalApplications from "@/components/PracticalApplications";
 import PersonalizedInsights from "@/components/PersonalizedInsights";
 import LabelFeedback from "@/components/LabelFeedback";
 import { ArchetypeAvatars } from "@/components/ArchetypeAvatars";
 import { SaveBanner } from "@/components/SaveBanner";
-
-// Must match STORAGE_ANS from the questionnaire page
-const STORAGE_ANS = "p9_answers";
+import * as resultsService from "./service/resultsService";
 
 type RawProfileItem = {
   slug: string;
@@ -41,36 +38,28 @@ export default function ResultsPage() {
   const [dimData, setDimData] = useState<{ dimension: string; score: number }[]>([]);
   const [profile, setProfile] = useState<RawProfileItem[] | null>(null);
 
-  // 1) Load answers from sessionStorage on mount
+  // Load answers and compute results on mount
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = sessionStorage.getItem(STORAGE_ANS);
-    if (!raw) {
-      // nothing to show → redirect back
+    const storedAnswers = resultsService.getStoredAnswers();
+    
+    if (!storedAnswers) {
+      // Nothing to show → redirect back
       router.replace("/questionnaire");
       return;
     }
-    let parsed: Record<string, number>;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
-      router.replace("/questionnaire");
-      return;
-    }
-    setAnswers(parsed);
+    
+    setAnswers(storedAnswers);
 
-    // dimension averages → radar
-    const avgs = computeDimensionAverages(parsed);
-    setDimData(
-      Object.entries(avgs).map(([dimension, score]) => ({ dimension, score }))
-    );
+    // Calculate dimension averages for radar chart
+    const dimensionData = resultsService.getDimensionData(storedAnswers);
+    setDimData(dimensionData);
 
-    // full archetype profile → sorted
-    const prof = computeProfile(parsed) as RawProfileItem[];
-    setProfile(prof);
+    // Calculate archetype profile
+    const archetypeProfile = resultsService.getArchetypeProfile(storedAnswers);
+    setProfile(archetypeProfile);
   }, [router]);
 
-  // 2) Loading states
+  // Loading states
   if (answers === null || profile === null) {
     return <div className="p-4 text-center">Loading your results…</div>;
   }
