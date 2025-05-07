@@ -15,6 +15,7 @@ const Body = z.object({
 const PatchBody = z.object({
   id: z.string(),
   followUpAnswer: z.string(),
+  isDoubleNeutral: z.boolean().optional(),
   agentKitData: z.any().optional(), // for future use
 });
 
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     const { userId, sessionId, questionId, questionText, answer } = Body.parse(await req.json());
 
-    const prompt = `The user gave a neutral answer (score ${answer}) to this introspective personality question: "${questionText}". Rephrase it more personally or in a deeper way to encourage reflection.`;
+    const prompt = `The user gave a neutral answer (score ${answer}) to this introspective personality question: "${questionText}". Rephrase it in a more personal or deeper way to encourage reflection, but keep it as a single Likert-style question (1-7 scale, same as the original). The rephrased question should be framed as a statement that can be rated from 1-7. Do not return a paragraph or open-ended prompt.`;
 
     const rephrasedPrompt = await callClaude(prompt);
 
@@ -50,8 +51,16 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { id, followUpAnswer, agentKitData } = PatchBody.parse(await req.json());
+    const { id, followUpAnswer, isDoubleNeutral, agentKitData } = PatchBody.parse(await req.json());
     const updateData: any = { followUpAnswer };
+    
+    // Add isDoubleNeutral flag if provided
+    if (isDoubleNeutral !== undefined) {
+      // Note: You would need to add this field to your QuestionRephrase model in schema.prisma
+      // updateData.isDoubleNeutral = isDoubleNeutral;
+      updateData.isDoubleNeutral = isDoubleNeutral;
+    }
+    
     if (agentKitData !== undefined) updateData.agentKitData = agentKitData;
 
     const updated = await prisma.questionRephrase.update({

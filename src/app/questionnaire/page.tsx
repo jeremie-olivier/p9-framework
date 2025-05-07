@@ -22,6 +22,10 @@ export default function Questionnaire() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [followUps, setFollowUps] = useState<Record<string, string>>({});
+  const [loadingFollowUp, setLoadingFollowUp] = useState<string | null>(null);
+  const [rephraseIds, setRephraseIds] = useState<Record<string, string>>({});
+  const [doubleNeutrals, setDoubleNeutrals] = useState<string[]>([]);
 
   const { mutateAsync: rephraseQuestion } = useRephrase();
 
@@ -49,68 +53,107 @@ export default function Questionnaire() {
     sessionStorage.setItem(STORAGE_IDX, String(currentIndex));
   }, [currentIndex]);
 
-  // advances index when the user answers current question
-  const handleAnswerChange = useCallback(
+  // Handle original question answers
+  const handleOriginalAnswer = useCallback(
     async (id: string, value: number) => {
       setAnswers((prev) => ({ ...prev, [id]: value }));
 
-      // NEUTRAL score (4) triggers question rephrasing
+      // If NEUTRAL, trigger rephrase and DO NOT advance
       if (value === 4) {
         const questionText = questions.find((q) => q.id === id)?.text || "";
-        console.log('Triggering rephrasing for:', { id, questionText, value });
-        
+        setLoadingFollowUp(id);
+        console.log("Rephrasing for question:", { id, questionText });
+
         try {
           const { rephrasedPrompt, id: rephraseId } = await rephraseQuestion({
             questionId: id,
             questionText,
             answer: value,
           });
-          console.log('Got rephrased prompt:', rephrasedPrompt);
-          console.log('rephraseId:', rephraseId);
-
-          // Show follow-up prompt in a modal or inline UI
-          const followUp = window.prompt(`🧠 Follow-up: ${rephrasedPrompt}`, "");
-          if (followUp && rephraseId) {
-            try {
-              const patchRes = await fetch('/api/agent', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: rephraseId, followUpAnswer: followUp }),
-              });
-              if (!patchRes.ok) {
-                const err = await patchRes.json();
-                console.error('PATCH error:', err);
-              } else {
-                console.log("Follow-up answer saved!");
-              }
-            } catch (err) {
-              console.error("Failed to save follow-up answer:", err);
-            }
-          } else {
-            console.warn('No followUp or rephraseId, PATCH not sent');
-          }
+          console.log("Got rephrased prompt:", rephrasedPrompt);
+          setFollowUps((prev) => ({ ...prev, [id]: rephrasedPrompt }));
+          setRephraseIds((prev) => ({ ...prev, [id]: rephraseId }));
         } catch (err) {
           console.error("Question rephrasing failed:", err);
-          // Show error to user
-          window.alert("Sorry, I couldn't rephrase the question. Please try again.");
+        } finally {
+          setLoadingFollowUp(null);
         }
+        // DO NOT advance index for neutral responses
+        return;
       }
 
+      // For non-neutral answers, advance as normal
       const idx = questions.findIndex((q) => q.id === id);
       if (idx === currentIndex && currentIndex < total - 1) {
         setCurrentIndex(idx + 1);
       }
     },
-    [currentIndex, total, rephraseQuestion]
+    [currentIndex, questions, rephraseQuestion, total]
+  );
+
+  // Handle follow-up question answers
+  const handleFollowUpAnswer = useCallback(
+    async (id: string, value: number) => {
+      const originalId = id.replace("_followup", "");
+      const rephraseId = rephraseIds[originalId];
+      setAnswers((prev) => ({ ...prev, [id]: value }));
+
+      // Track double-neutral responses
+      const isDoubleNeutral = value === 4;
+      if (isDoubleNeutral) {
+        setDoubleNeutrals((prev) => [...prev, originalId]);
+      }
+      
+      // PATCH answer to DB
+      if (rephraseId) {
+        try {
+          await fetch('/api/agent', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: rephraseId, 
+              followUpAnswer: String(value),
+              isDoubleNeutral 
+            }),
+          });
+        } catch (err) {
+          console.error("Failed to save follow-up answer:", err);
+        }
+      }
+
+      // Always advance after a follow-up is answered
+      const idx = questions.findIndex((q) => q.id === originalId);
+      if (idx === currentIndex && currentIndex < total - 1) {
+        setCurrentIndex(idx + 1);
+      }
+    },
+    [currentIndex, questions, rephraseIds, total]
+  );
+
+  // Main answer change handler
+  const handleAnswerChange = useCallback(
+    (id: string, value: number) => {
+      if (id.endsWith("_followup")) {
+        handleFollowUpAnswer(id, value);
+      } else {
+        handleOriginalAnswer(id, value);
+      }
+    },
+    [handleFollowUpAnswer, handleOriginalAnswer]
   );
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (Object.keys(answers).length !== total) {
-        setFormError("Please answer all questions before submitting.");
+      
+      // Count only answers to original questions (not follow-ups) for completion check
+      const originalQuestionsAnswered = Object.keys(answers).filter(id => !id.includes('_followup')).length;
+      
+      if (originalQuestionsAnswered !== total) {
+        setFormError(`Please answer all questions before submitting. (${originalQuestionsAnswered}/${total})`);
         return;
       }
+      
       setFormError(null);
       setIsSubmitting(true);
 
@@ -134,8 +177,30 @@ export default function Questionnaire() {
     [answers, router, total]
   );
 
+  // Debugging logs for follow-ups
+  useEffect(() => {
+    if (Object.keys(followUps).length > 0) {
+      console.log("Current followUps state:", followUps);
+    }
+  }, [followUps]);
+
+  useEffect(() => {
+    if (loadingFollowUp) {
+      console.log("Loading follow-up for:", loadingFollowUp);
+    }
+  }, [loadingFollowUp]);
+
   const visible = questions.slice(0, currentIndex + 1);
-  const allAnswered = Object.keys(answers).length === total;
+  
+  // Count only answers to original questions, not follow-ups
+  const originalAnswersCount = Object.keys(answers).filter(id => !id.includes('_followup')).length;
+  const allAnswered = originalAnswersCount === total;
+
+  // Debug what's visible 
+  useEffect(() => {
+    console.log("Current visible questions:", visible.map(q => q.id));
+    console.log("Current index:", currentIndex);
+  }, [visible, currentIndex]);
 
   return (
     <form onSubmit={handleSubmit} className="p-4 max-w-2xl mx-auto">
@@ -167,6 +232,9 @@ export default function Questionnaire() {
           .map((q, revIdx) => {
             const idx = visible.length - 1 - revIdx;
             const isActive = idx === currentIndex;
+            const isFollowUpLoading = loadingFollowUp === q.id;
+            const followUp = followUps[q.id];
+
             return (
               <motion.div
                 key={q.id}
@@ -176,11 +244,31 @@ export default function Questionnaire() {
                 transition={ANIM}
                 className={isActive ? "mb-8" : "mb-4"}
               >
+                {/* Show loading or follow-up ABOVE the original question */}
+                {isActive && (
+                  <>
+                    {isFollowUpLoading && (
+                      <p className="text-sm text-gray-500 animate-pulse pl-4 mb-2">🧠 Generating follow-up...</p>
+                    )}
+                    {followUp && (
+                      <Question
+                        id={`${q.id}_followup`}
+                        text={followUp}
+                        value={answers[`${q.id}_followup`] ?? 0}
+                        onChange={handleAnswerChange}
+                      />
+                    )}
+                  </>
+                )}
+
+                {/* Original Question (outlined/disabled if follow-up exists) */}
                 <Question
                   id={q.id}
                   text={q.text}
                   value={answers[q.id] ?? 0}
                   onChange={handleAnswerChange}
+                  disabled={!!followUp}
+                  outlined={!!followUp}
                 />
               </motion.div>
             );
