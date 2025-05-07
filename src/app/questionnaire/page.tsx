@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { track } from "@vercel/analytics";
 import Question from "./components/Question";
 import { questions } from "./components/questions";
+import { useRephrase } from "@/hooks/useRephrase";
 
 const ANIM = { duration: 0.3 };
 const STORAGE_ANS = "p9_answers";
@@ -21,6 +22,8 @@ export default function Questionnaire() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const { mutateAsync: rephraseQuestion } = useRephrase();
 
   // Hydrate once on mount (fire-and-forget)
   useEffect(() => {
@@ -48,14 +51,57 @@ export default function Questionnaire() {
 
   // advances index when the user answers current question
   const handleAnswerChange = useCallback(
-    (id: string, value: number) => {
+    async (id: string, value: number) => {
       setAnswers((prev) => ({ ...prev, [id]: value }));
+
+      // NEUTRAL score (4) triggers question rephrasing
+      if (value === 4) {
+        const questionText = questions.find((q) => q.id === id)?.text || "";
+        console.log('Triggering rephrasing for:', { id, questionText, value });
+        
+        try {
+          const { rephrasedPrompt, id: rephraseId } = await rephraseQuestion({
+            questionId: id,
+            questionText,
+            answer: value,
+          });
+          console.log('Got rephrased prompt:', rephrasedPrompt);
+          console.log('rephraseId:', rephraseId);
+
+          // Show follow-up prompt in a modal or inline UI
+          const followUp = window.prompt(`🧠 Follow-up: ${rephrasedPrompt}`, "");
+          if (followUp && rephraseId) {
+            try {
+              const patchRes = await fetch('/api/agent', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: rephraseId, followUpAnswer: followUp }),
+              });
+              if (!patchRes.ok) {
+                const err = await patchRes.json();
+                console.error('PATCH error:', err);
+              } else {
+                console.log("Follow-up answer saved!");
+              }
+            } catch (err) {
+              console.error("Failed to save follow-up answer:", err);
+            }
+          } else {
+            console.warn('No followUp or rephraseId, PATCH not sent');
+          }
+        } catch (err) {
+          console.error("Question rephrasing failed:", err);
+          // Show error to user
+          window.alert("Sorry, I couldn't rephrase the question. Please try again.");
+        }
+      }
+
       const idx = questions.findIndex((q) => q.id === id);
       if (idx === currentIndex && currentIndex < total - 1) {
         setCurrentIndex(idx + 1);
       }
     },
-    [currentIndex, total]
+    [currentIndex, total, rephraseQuestion]
   );
 
   const handleSubmit = useCallback(
