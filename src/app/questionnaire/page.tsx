@@ -9,42 +9,44 @@ import Question from "./components/Question";
 import { questions } from "./components/questions";
 
 const ANIM = { duration: 0.3 };
-const STORAGE_ANS = "answers";
-const STORAGE_IDX = "currentIndex";
-const STORAGE_TEST = "testId";
+const STORAGE_ANS = "p9_answers";
+const STORAGE_IDX = "p9_currentIndex";
+const STORAGE_TEST = "p9_testId";
 
 export default function Questionnaire() {
   const router = useRouter();
   const total = questions.length;
 
-  // Hydrate answers from localStorage
-  const [answers, setAnswers] = useState<Record<string, number>>(() => {
-    try {
-      return JSON.parse(window.sessionStorage.getItem(STORAGE_ANS) || "{}");
-    } catch {
-      return {};
-    }
-  });
-
-  // Hydrate currentIndex (clamp to [0, total-1])
-  const [currentIndex, setCurrentIndex] = useState<number>(() => {
-    const saved = parseInt(window.sessionStorage.getItem(STORAGE_IDX) || "", 10);
-    if (!isNaN(saved) && saved >= 0 && saved < total) return saved;
-    return 0;
-  });
-
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Whenever answers or index change, persist them
+  // Hydrate once on mount (fire-and-forget)
   useEffect(() => {
-    window.sessionStorage.setItem(STORAGE_ANS, JSON.stringify(answers));
+    if (typeof window === "undefined") return;
+    try {
+      const a = sessionStorage.getItem(STORAGE_ANS);
+      if (a) setAnswers(JSON.parse(a));
+      const idx = parseInt(sessionStorage.getItem(STORAGE_IDX) || "", 10);
+      if (!isNaN(idx) && idx >= 0 && idx < total) {
+        setCurrentIndex(idx);
+      }
+    } catch { }
+  }, [total]);
+
+  // Persist answers & index continuously
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem(STORAGE_ANS, JSON.stringify(answers));
   }, [answers]);
 
   useEffect(() => {
-    window.sessionStorage.setItem(STORAGE_IDX, String(currentIndex));
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem(STORAGE_IDX, String(currentIndex));
   }, [currentIndex]);
 
+  // advances index when the user answers current question
   const handleAnswerChange = useCallback(
     (id: string, value: number) => {
       setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -67,19 +69,17 @@ export default function Questionnaire() {
       setIsSubmitting(true);
 
       try {
-        // Generate and store testId once
-        const testId = window.sessionStorage.getItem(STORAGE_TEST) || nanoid();
-        window.sessionStorage.setItem(STORAGE_TEST, testId);
-
-        // Analytics (fire-and-forget)
-        try {
-          track("Completed Questionnaire");
-        } catch (err) {
-          // Silently ignore analytics failures?
-          console.warn("Analytics track failed:", err);
+        // generate or reuse testId
+        let testId = sessionStorage.getItem(STORAGE_TEST);
+        if (!testId) {
+          testId = nanoid();
+          sessionStorage.setItem(STORAGE_TEST, testId);
         }
 
-        // Navigate to results
+        // analytics (fire-and-forget)
+        try { track("Completed Questionnaire"); } catch { }
+
+        // Navigate to results (answers/testId still in sessionStorage)
         router.push("/results");
       } finally {
         setIsSubmitting(false);
@@ -88,19 +88,13 @@ export default function Questionnaire() {
     [answers, router, total]
   );
 
-  // Get only up to the current question
   const visible = questions.slice(0, currentIndex + 1);
   const allAnswered = Object.keys(answers).length === total;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 max-w-2xl mx-auto"
-      aria-invalid={!!formError}
-    >
-      <h2 className="text-2xl font-bold mb-4">P9 Assessment</h2>
+    <form onSubmit={handleSubmit} className="p-4 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Personality Assessment</h2>
 
-      {/* Progress & Submit */}
       <div className="flex justify-between items-center mb-6">
         <p className="text-sm text-gray-600" aria-live="polite">
           Question {currentIndex + 1} of {total}
@@ -114,14 +108,12 @@ export default function Questionnaire() {
         </button>
       </div>
 
-      {/* Validation Error */}
       {formError && (
         <p className="mb-4 text-red-600" role="alert">
           {formError}
         </p>
       )}
 
-      {/* Questions */}
       <AnimatePresence initial={false}>
         {visible
           .slice()

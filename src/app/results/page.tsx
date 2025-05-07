@@ -1,16 +1,20 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+
 import { computeProfile, computeDimensionAverages } from "@/lib/scoring";
 import DimensionRadar from "@/components/DimensionRadar";
 import PracticalApplications from "@/components/PracticalApplications";
 import PersonalizedInsights from "@/components/PersonalizedInsights";
 import LabelFeedback from "@/components/LabelFeedback";
-import { ArchetypeIcon } from "@/components/Icons";
+import { ArchetypeAvatars } from "@/components/ArchetypeAvatars";
 import { SaveBanner } from "@/components/SaveBanner";
+
+// Must match STORAGE_ANS from the questionnaire page
+const STORAGE_ANS = "p9_answers";
 
 type RawProfileItem = {
   slug: string;
@@ -33,44 +37,56 @@ export default function ResultsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
+  const [answers, setAnswers] = useState<Record<string, number> | null>(null);
   const [dimData, setDimData] = useState<{ dimension: string; score: number }[]>([]);
   const [profile, setProfile] = useState<RawProfileItem[] | null>(null);
 
-  // Load & compute everything on mount
+  // 1) Load answers from sessionStorage on mount
   useEffect(() => {
-    // Load answers
-    const raw = window.localStorage.getItem("answers") || "{}";
-    const answers = JSON.parse(raw) as Record<string, number>;
+    if (typeof window === "undefined") return;
+    const raw = sessionStorage.getItem(STORAGE_ANS);
+    if (!raw) {
+      // nothing to show → redirect back
+      router.replace("/questionnaire");
+      return;
+    }
+    let parsed: Record<string, number>;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      router.replace("/questionnaire");
+      return;
+    }
+    setAnswers(parsed);
 
-    // Dimension averages → radar
-    const dimAvgs = computeDimensionAverages(answers);
+    // dimension averages → radar
+    const avgs = computeDimensionAverages(parsed);
     setDimData(
-      Object.entries(dimAvgs).map(([dimension, score]) => ({ dimension, score }))
+      Object.entries(avgs).map(([dimension, score]) => ({ dimension, score }))
     );
 
-    // Archetype profile → sorted list
-    const prof = computeProfile(answers) as RawProfileItem[];
+    // full archetype profile → sorted
+    const prof = computeProfile(parsed) as RawProfileItem[];
     setProfile(prof);
-  }, []);
+  }, [router]);
 
-  // Still loading the profile
-  if (!profile) {
-    return <div className="p-4 text-center">Loading your results...</div>;
+  // 2) Loading states
+  if (answers === null || profile === null) {
+    return <div className="p-4 text-center">Loading your results…</div>;
   }
-
-  // Wait for NextAuth
   if (status === "loading") {
-    return <div className="p-4 text-center">Loading session...</div>;
+    return <div className="p-4 text-center">Checking sign-in status…</div>;
   }
 
-  // If the user has a profile and a session → show results
   const primary = profile[0];
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-8">
-      {/* Save via Email + Wallet Connect */}
+      {/* Save Banner */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
-        <h2 className="text-2xl font-bold">Your results are here — save them to your profile for later!</h2>
+        <h2 className="text-2xl font-bold">
+          Your results are ready — save them to your profile!
+        </h2>
         <SaveBanner />
       </section>
 
@@ -99,7 +115,7 @@ export default function ResultsPage() {
 
       {/* Primary Archetype Detail */}
       <section className="bg-blue-50 p-4 rounded shadow flex items-start space-x-4">
-        <div>{ArchetypeIcon[primary.slug]}</div>
+        <div>{ArchetypeAvatars[primary.slug]}</div>
         <div>
           <h3 className="text-xl font-semibold">{primary.name}</h3>
           <p className="mt-1 mb-2">Score: {primary.score.toFixed(2)}</p>
@@ -113,7 +129,7 @@ export default function ResultsPage() {
         </div>
       </section>
 
-      {/* Other Archetypes (compact list) */}
+      {/* Other Archetypes */}
       <section>
         <h3 className="text-lg font-medium mb-2 text-gray-600">
           Other Archetypes

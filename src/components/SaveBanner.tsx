@@ -2,22 +2,24 @@
 "use client";
 
 import { useSession, signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
+import { nanoid } from "nanoid";
 import { computeProfile } from "@/lib/scoring";
-import { useTestId } from "@/hooks/useTestId";
+
+const STORAGE_ANS = "p9_answers";
+const STORAGE_IDX = "p9_currentIndex";
+const STORAGE_TEST = "p9_testId";
 
 export function SaveBanner() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const testId = useTestId();
+  const [done, setDone] = useState(false);
 
   // While NextAuth is initializing
   if (status === "loading") return null;
 
-  // Not signed in, prompt login
+  // Not signed in → prompt login
   if (!session?.user?.email) {
     return (
       <button
@@ -31,69 +33,70 @@ export function SaveBanner() {
     );
   }
 
-  // Core save logic, with idempotent testId
-  const saveToServer = async () => {
-    if (!testId) {
-      throw new Error("No test identifier found");
-    }
-
-    const answers = JSON.parse(
-      window.localStorage.getItem("answers") || "{}"
-    ) as Record<string, number>;
-
-    const prof = computeProfile(answers);
-    if (prof.length === 0) {
-      throw new Error("You haven’t completed the test yet.");
-    }
-
-    const res = await fetch("/api/save-results", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        testId,
-        email: session.user.email,
-        archetype: prof[0].slug,
-        answers,
-      }),
-    });
-
-    const payload = await res.json();
-    if (!res.ok) {
-      throw new Error(payload.error || res.statusText);
-    }
-    return payload.alreadySaved as boolean;
-  };
-
-  // Saving handler
-  const handleSave = async () => {
-    if (saving) return;
+  const handleSave = useCallback(async () => {
+    if (saving || done) return;
     setSaving(true);
+
     try {
-      const already = await saveToServer();
-      if (already) {
-        toast("You’ve already saved this result.");
+      // 1) Grab or generate testId
+      let testId = sessionStorage.getItem(STORAGE_TEST);
+      if (!testId) {
+        testId = nanoid();
+        sessionStorage.setItem(STORAGE_TEST, testId);
+      }
+
+      // 2) Load answers & compute primary archetype
+      const raw = sessionStorage.getItem(STORAGE_ANS) || "{}";
+      const answers = JSON.parse(raw) as Record<string, number>;
+      const prof = computeProfile(answers);
+      if (!prof.length) throw new Error("No completed test to save.");
+
+      // 3) POST to your endpoint
+      const res = await fetch("/api/save-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testId,
+          email: session.user.email,
+          archetype: prof[0].slug,
+          answers,
+        }),
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || res.statusText);
+
+      // 4) Notify & clear storage on first-time save
+      if (payload.alreadySaved) {
+        toast("Already saved!");
       } else {
         toast.success("Saved to your profile!");
+        sessionStorage.removeItem(STORAGE_ANS);
+        sessionStorage.removeItem(STORAGE_IDX);
+        sessionStorage.removeItem(STORAGE_TEST);
       }
-      // e.g. router.push("/profile/history")
+
+      setDone(true);
     } catch (err: any) {
-      console.error("Save failed:", err);
+      console.error("SaveBanner error:", err);
       toast.error(err.message || "Couldn’t save your results");
     } finally {
       setSaving(false);
     }
-  };
+  }, [saving, done, session]);
 
   return (
     <button
       onClick={handleSave}
-      disabled={saving}
+      disabled={saving || done}
       className={`
-        px-4 py-2 rounded text-white
-        ${saving ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}
+        px-4 py-2 rounded text-white transition
+        ${saving || done
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700"
+        }
       `}
     >
-      {saving ? "Saving..." : "Save Results"}
+      {saving ? "Saving…" : done ? "Saved ✓" : "Save Results"}
     </button>
   );
 }

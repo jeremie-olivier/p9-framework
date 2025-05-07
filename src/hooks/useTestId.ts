@@ -1,20 +1,17 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { nanoid } from "nanoid";
 
-export function useTestId(): string {
-  const [ testId, setTestId ] = useState<string>("");
+/**
+ * Pulls the testId from sessionStorage (set in questionnaire).
+ * Returns null if none is found.
+ */
+export function useTestId(): string | null {
+  const [testId, setTestId] = useState<string | null>(null);
 
   useEffect(() => {
-    // On mount, only once
-    let id = window.localStorage.getItem("testId");
-    if (!id) {
-      id = nanoid();
-      window.localStorage.setItem("testId", id);
-    }
-    setTestId(id);
+    const tid = sessionStorage.getItem("testId");
+    setTestId(tid);
   }, []);
 
   return testId;
-};
+}
