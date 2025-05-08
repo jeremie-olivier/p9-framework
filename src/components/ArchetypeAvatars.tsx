@@ -81,17 +81,19 @@ function Signature({ slug }: { slug: ArchetypeSlug }) {
       return (
         <>
           <circle cx="32" cy="24" r="2" {...sigProps} />
-          <circle cx="24" cy="36" r="2" {...sigProps} />
-          <circle cx="40" cy="36" r="2" {...sigProps} />
-          <path d="M32 26 L32 34 M32 34 L24 36 M32 34 L40 36" {...sigProps} />
+          <circle cx="23" cy="38" r="2" {...sigProps} />
+          <circle cx="41" cy="38" r="2" {...sigProps} />
+          <path d="M32 26 L32 34 M32 34 L26 37 M32 34 L38 37" {...sigProps} />
         </>
       );
     case "guardian":
       return (
         <>
-          <rect width="16" height="16" x="24" y="24" {...sigProps} />
-          <line x1="24" y1="32" x2="40" y2="32" {...sigProps} />
-          <line x1="32" y1="24" x2="32" y2="40" {...sigProps} />
+          <rect width="20" height="20" x="22" y="22" {...sigProps} />
+          <line x1="22" y1="27" x2="32" y2="27" {...sigProps} />
+          <line x1="37" y1="22" x2="37" y2="32" {...sigProps} />
+          <line x1="32" y1="37" x2="42" y2="37" {...sigProps} />
+          <line x1="27" y1="42" x2="27" y2="32" {...sigProps} />
         </>
       );
     case "influencer":

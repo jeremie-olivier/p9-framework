@@ -42,7 +42,6 @@ export default function SignInPage() {
 
       {Object.values(providers).map((prov: any) => (
         <Button
-          variant="default"
           key={prov.id}
           onClick={() => signIn(prov.id, { callbackUrl: "/" })}
         >
