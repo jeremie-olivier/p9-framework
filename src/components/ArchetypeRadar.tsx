@@ -1,48 +1,84 @@
+
+
 "use client";
 
-import React from "react";
 import {
-  RadarChart,
   Radar,
+  RadarChart,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
   Tooltip,
 } from "recharts";
-import { Centroid } from "@/lib/archetypeCentroids";
+import type { Centroid } from "@/lib/archetypeCentroids";
 
 interface ArchetypeRadarProps {
+  data: Centroid[];
   slug: string;
   name: string;
-  // We know each Centroid has a `dimension` and also a numeric value at [slug]
-  data: Centroid[];
+  width?: number;
+  height?: number;
+  showTooltip?: boolean;
+  withReferenceBands?: boolean;
+  tickLabels?: boolean;
 }
 
 export default function ArchetypeRadar({
+  data,
   slug,
   name,
-  data,
+  width = 300,
+  height = 300,
+  showTooltip = true,
+  withReferenceBands = true,
+  tickLabels = true,
 }: ArchetypeRadarProps) {
-  // Map Centroid[] to the shape recharts expects
   const chartData = data.map((d) => ({
     dimension: d.dimension,
-    // TS knows Centroid has an index signature for slug
     score: d[slug] as number,
   }));
 
   return (
-    <RadarChart width={300} height={300} data={chartData} outerRadius={120}>
+    <RadarChart width={width} height={height} data={chartData} outerRadius={120}>
       <PolarGrid />
-      <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 12 }} />
-      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
+      <PolarAngleAxis dataKey="dimension" tick={tickLabels ? { fontSize: 12 } : false} />
+      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+      {withReferenceBands && (
+        <>
+          <Radar
+            name="25th Percentile"
+            dataKey={() => 25}
+            stroke="#ddd"
+            fill="#eee"
+            fillOpacity={0.05}
+            isAnimationActive={false}
+          />
+          <Radar
+            name="50th Percentile"
+            dataKey={() => 50}
+            stroke="#ccc"
+            fill="#ccc"
+            fillOpacity={0.05}
+            isAnimationActive={false}
+          />
+          <Radar
+            name="75th Percentile"
+            dataKey={() => 75}
+            stroke="#ddd"
+            fill="#eee"
+            fillOpacity={0.05}
+            isAnimationActive={false}
+          />
+        </>
+      )}
       <Radar
         name={name}
         dataKey="score"
-        stroke="#7598F9"
-        fill="#7598F9"
-        fillOpacity={0.6}
+        stroke="#3a5fcd"
+        fill="#3a5fcd"
+        fillOpacity={0.8}
       />
-      <Tooltip />
+      {showTooltip && <Tooltip />}
     </RadarChart>
   );
 }

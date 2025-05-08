@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { useAssessmentScores } from "@/hooks/useAssessmentScores";
-import DimensionRadar from "@/components/DimensionRadar";
+import ArchetypeRadar from "@/components/ArchetypeRadar";
 import PracticalApplications from "@/components/PracticalApplications";
 import PersonalizedInsights from "@/components/PersonalizedInsights";
 import LabelFeedback from "@/components/LabelFeedback";
@@ -82,7 +82,13 @@ export default function ResultsPage() {
           ))}
         </ul>
         <div className="flex justify-center">
-          <DimensionRadar data={dimData} />
+          <ArchetypeRadar
+            data={dimData.map((d) => ({ dimension: d.dimension, user: d.score }))}
+            slug="user"
+            name="Your Scores"
+            withReferenceBands
+            showTooltip
+          />
         </div>
       </section>
 
@@ -120,9 +126,13 @@ export default function ResultsPage() {
       </section>
 
       {/* Tailored Content */}
-      <PracticalApplications apps={primary.applications} />
-      <PersonalizedInsights recommendations={primary.recommendations} />
-      <LabelFeedback label={primary.slug} />
+      {primary && (
+        <>
+          <PracticalApplications apps={primary.applications} />
+          <PersonalizedInsights recommendations={primary.recommendations} />
+          <LabelFeedback label={primary.slug} />
+        </>
+      )}
     </div>
   );
 }

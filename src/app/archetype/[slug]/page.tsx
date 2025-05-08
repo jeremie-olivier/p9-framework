@@ -55,9 +55,11 @@ export default function ArchetypePage({ params }: ArchetypePageProps) {
         </h2>
         <div className="flex justify-center">
           <ArchetypeRadar
+            data={data}
             slug={archetype.slug}
             name={archetype.name}
-            data={data}
+            withReferenceBands
+            showTooltip
           />
         </div>
       </section>
