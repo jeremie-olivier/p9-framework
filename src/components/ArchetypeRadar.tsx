@@ -1,7 +1,6 @@
-
-
 "use client";
 
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Radar,
   RadarChart,
@@ -38,8 +37,31 @@ export default function ArchetypeRadar({
     score: d[slug] as number,
   }));
 
+  // Hydration guard for tooltip
+  const [mounted, setMounted] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | undefined>();
+  const handleMouseMove = (e: any) => {
+    if (e && typeof e.chartX === "number" && typeof e.chartY === "number") {
+      setTooltipPos({ x: e.chartX, y: e.chartY });
+    }
+  };
+  const handleMouseLeave = useCallback(() => {
+    setTooltipPos(undefined);
+  }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
+
   return (
-    <RadarChart width={width} height={height} data={chartData} outerRadius={120}>
+    <RadarChart
+      width={width}
+      height={height}
+      data={chartData}
+      outerRadius={120}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       <PolarGrid />
       <PolarAngleAxis dataKey="dimension" tick={tickLabels ? { fontSize: 12 } : false} />
       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
@@ -72,13 +94,40 @@ export default function ArchetypeRadar({
         </>
       )}
       <Radar
-        name={name}
         dataKey="score"
         stroke="#3a5fcd"
         fill="#3a5fcd"
         fillOpacity={0.8}
       />
-      {showTooltip && <Tooltip />}
+      {showTooltip && tooltipPos && (
+        <Tooltip
+          position={tooltipPos}
+          wrapperStyle={{
+            pointerEvents: "none",
+            transition: "opacity 150ms ease-in-out",
+            opacity: tooltipPos ? 1 : 0,
+          }}
+          contentStyle={{
+            backgroundColor: "#000",
+            borderRadius: 10,
+            padding: "8px 12px",
+            border: "none",
+          }}
+          labelStyle={{
+            fontSize: "0.85rem",
+            marginBottom: 4,
+          }}
+          itemStyle={{
+            color: "#fff",
+            fontSize: "1rem",
+          }}
+          labelFormatter={() => name}
+          formatter={(value, key, props) => {
+            const dim = props?.payload?.dimension ?? key;
+            return [`${value}`, `${dim}`];
+          }}
+        />
+      )}
     </RadarChart>
   );
 }

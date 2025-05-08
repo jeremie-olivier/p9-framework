@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import HistoryTable from "./components/HistoryTable";
 import WalletConnect from "@/components/WalletConnect";
 import { computeDimensionAverages, computeProfile } from "@/lib/scoring";
-import DimensionRadar from "@/components/DimensionRadar";
+import ArchetypeRadar from "@/components/ArchetypeRadar";
 import { ArchetypeAvatars } from "@/components/ArchetypeAvatars";
 
 export default async function ProfilePage() {
@@ -39,6 +39,11 @@ export default async function ProfilePage() {
     }),
   ]);
 
+  const serializedAssessments = assessments.map(a => ({
+    ...a,
+    createdAt: a.createdAt.toISOString(),
+  }));
+
   // 4) Pick the latest one to show summary
   const latest = assessments[0] ?? null;
 
@@ -65,19 +70,31 @@ export default async function ProfilePage() {
           <div className="flex flex-wrap gap-6">
             {/* Radar */}
             <div>
-              <DimensionRadar data={dimData} />
+              <ArchetypeRadar
+                data={dimData.map(d => ({ dimension: d.dimension, user: d.score }))}
+                slug="user"
+                name="Your Scores"
+                withReferenceBands
+                showTooltip
+              />
             </div>
 
             {/* Primary archetype */}
-            {primary && (
-              <div className="flex items-center space-x-4">
-                <div className="text-4xl">{ArchetypeAvatars[primary.slug]}</div>
-                <div>
-                  <h3 className="text-xl font-semibold">{primary.name}</h3>
-                  <p>Score: {primary.score.toFixed(2)}</p>
+            {primary && (() => {
+              function isValidArchetypeSlug(slug: string): slug is keyof typeof ArchetypeAvatars {
+                return slug in ArchetypeAvatars;
+              }
+
+              return isValidArchetypeSlug(primary.slug) ? (
+                <div className="flex items-center space-x-4">
+                  <div className="text-4xl">{ArchetypeAvatars[primary.slug]}</div>
+                  <div>
+                    <h3 className="text-xl font-semibold">{primary.name}</h3>
+                    <p>Score: {primary.score.toFixed(2)}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
           </div>
         </section>
       ) : (
@@ -85,13 +102,13 @@ export default async function ProfilePage() {
       )}
 
       {/* 📜 History table */}
-      <HistoryTable assessments={assessments ?? []} />
+      <HistoryTable assessments={serializedAssessments} />
 
       {/* 🔗 Wallet connect */}
       {!user?.ethAddress && (
         <section>
           <h2 className="text-xl font-medium mb-2">Connect your Ethereum wallet</h2>
-          <WalletConnect userId={userId} />
+          <WalletConnect />
         </section>
       )}
     </div>
