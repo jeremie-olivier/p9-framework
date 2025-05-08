@@ -28,26 +28,40 @@ export function mapLikert(raw: number): number {
 
 // 2) Initialize buckets for all dimensions based on questions
 function initBuckets(): Record<Dimension, number[]> {
+  // Collect all unique dimensions from questions' dimensions arrays
   const dims = Array.from(
-    new Set(questions.map(q => q.dimension as Dimension))
+    new Set(
+      questions.flatMap(q =>
+        Array.isArray(q.dimensions)
+          ? q.dimensions
+          : (q.dimensions ? [q.dimensions] : [])
+      )
+    )
   ) as Dimension[];
   const buckets: Record<Dimension, number[]> = {} as any;
   dims.forEach(dim => { buckets[dim] = []; });
   return buckets;
-};
+}
 
 // 3) Group and average
 function groupByDimension(answers: Answers) {
   const buckets = initBuckets();
   for (const q of questions) {
-    const dim = q.dimension as Dimension;
-    if (!buckets[dim]) continue;
+    // Support multi-dimensional questions
+    const dims = Array.isArray(q.dimensions)
+      ? q.dimensions
+      : (q.dimensions ? [q.dimensions] : []);
     let raw = answers[q.id] ?? 4;
     if (q.reverse) raw = 8 - raw;
-    buckets[dim].push(mapLikert(raw));
+    const value = mapLikert(raw);
+    const weight = typeof (q as any).weight === "number" ? (q as any).weight : 1.0;
+    for (const dim of dims) {
+      if (!buckets[dim]) continue;
+      buckets[dim].push(value * weight);
+    }
   }
   return buckets;
-};
+}
 
 export function computeDimensionAverages(
   answers: Answers
