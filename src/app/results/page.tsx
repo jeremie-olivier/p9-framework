@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import type { Dimension } from "@/lib/archetypeCentroids";
 import { useAssessmentScores } from "@/hooks/useAssessmentScores";
 import ArchetypeRadar from "@/components/ArchetypeRadar";
+import { scaleScoreTo100 } from "@/lib/scoring";
 import PracticalApplications from "@/components/PracticalApplications";
 import PersonalizedInsights from "@/components/PersonalizedInsights";
 import LabelFeedback from "@/components/LabelFeedback";
@@ -83,7 +85,10 @@ export default function ResultsPage() {
         </ul>
         <div className="flex justify-center">
           <ArchetypeRadar
-            data={dimData.map((d) => ({ dimension: d.dimension, user: d.score }))}
+            data={dimData.map((d) => ({
+              dimension: d.dimension as Dimension,
+              user: scaleScoreTo100(d.score),
+            }))}
             slug="user"
             name="Your Scores"
             withReferenceBands
@@ -95,7 +100,7 @@ export default function ResultsPage() {
       {/* Primary Archetype Detail */}
       {primary && (
         <section className="bg-blue-50 p-4 rounded shadow flex items-start space-x-4">
-          <div>{ArchetypeAvatars[primary.slug]}</div>
+          <div>{ArchetypeAvatars[primary.slug as keyof typeof ArchetypeAvatars]}</div>
           <div>
             <h3 className="text-xl font-semibold">{primary.name}</h3>
             <p className="mt-1 mb-2">Score: {primary.score.toFixed(2)}</p>

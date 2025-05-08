@@ -41,7 +41,7 @@ function initBuckets(): Record<Dimension, number[]> {
   const buckets: Record<Dimension, number[]> = {} as any;
   dims.forEach(dim => { buckets[dim] = []; });
   return buckets;
-}
+};
 
 // 3) Group and average
 function groupByDimension(answers: Answers) {
@@ -61,7 +61,7 @@ function groupByDimension(answers: Answers) {
     }
   }
   return buckets;
-}
+};
 
 export function computeDimensionAverages(
   answers: Answers
@@ -77,11 +77,17 @@ export function computeDimensionAverages(
   return avgs;
 };
 
-// 4) Compute archetype similarity scores
-function scaleTo100(x: number): number {
-  return ((x + 3) / 6) * 100;
+// Helper to scale a raw dimension score from [-3, +3] to [0, 100]
+export function scaleScoreTo100(raw: number): number {
+  return ((raw + 3) / 6) * 100;
 };
 
+// Helper to scale a dimension score to a unit scale
+export function scaleScoreToUnit(raw: number): number {
+  return (raw + 3) / 6;
+};
+
+// 4) Compute archetype similarity scores
 function computeDistances(
   user: Record<Dimension, number>
 ): Record<string, number> {
@@ -90,7 +96,7 @@ function computeDistances(
     let sumSq = 0;
     centroids.forEach(c => {
       const dim = c.dimension;
-      const u = scaleTo100(user[dim] ?? 0);
+      const u = scaleScoreTo100(user[dim] ?? 0);
       const cent = c[slug] as number;
       sumSq += (u - cent) ** 2;
     });

@@ -4,6 +4,7 @@ import { archetypes } from "@/lib/archetypes";
 import { archetypeCentroids, Centroid } from "@/lib/archetypeCentroids";
 import ArchetypeRadar from "@/components/ArchetypeRadar";
 import { ArchetypeAvatars } from "@/components/ArchetypeAvatars";
+import type { Dimension } from "@/lib/archetypeCentroids";
 
 interface ArchetypePageProps {
   params: { slug: string };
@@ -33,18 +34,22 @@ export default function ArchetypePage({ params }: ArchetypePageProps) {
     );
   }
 
-  const data: Centroid[] = archetypeCentroids[archetype.slug] || [];
+  const rawData: Centroid[] = archetypeCentroids[archetype.slug] || [];
+  const data = rawData.map(d => ({
+    dimension: d.dimension as Dimension,
+    [archetype.slug]: d[archetype.slug] as number,
+  }));
 
   return (
-    <article className="max-w-3xl mx-auto p-6 space-y-8">
+    <article className="max-w-3xl mx-auto p-6 space-y-8" aria-labelledby={`archetype-${archetype.slug}`}>
       {/* Icon */}
       <header className="flex justify-center">
-        {ArchetypeAvatars[archetype.slug]}
+        {ArchetypeAvatars[archetype.slug as keyof typeof ArchetypeAvatars]}
       </header>
 
       {/* Title & Description */}
       <section className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">{archetype.name}</h1>
+        <h1 id={`archetype-${archetype.slug}`} className="text-4xl font-bold">{archetype.name}</h1>
         <p className="text-gray-700">{archetype.description}</p>
       </section>
 

@@ -6,6 +6,7 @@ import { archetypes, type Archetype } from "@/lib/archetypes";
 import { ArchetypeAvatars, type ArchetypeSlug } from "./ArchetypeAvatars";
 import ArchetypeRadar from "@/components/ArchetypeRadar";
 import { Plus } from '@/components/Icons';
+import type { Dimension } from "@/lib/archetypeCentroids";
 
 interface Props {
   slug: ArchetypeSlug;
@@ -19,6 +20,11 @@ export function ArchetypeCard({ slug, centroid }: Props) {
   }
   const { name, signature } = archetype;
 
+  const scaledCentroid = centroid.map((d) => ({
+    dimension: d.dimension as Dimension,
+    [slug]: d[slug] as number,
+  }));
+
   return (
     <Link
       href={`/archetype/${slug}`}
@@ -31,7 +37,13 @@ export function ArchetypeCard({ slug, centroid }: Props) {
       <h3 className="text-xl font-semibold mb-1">{name}</h3>
       <p className="text-center mb-4">{signature}</p>
 
-      <ArchetypeRadar data={centroid} slug={slug} name={name} withReferenceBands showTooltip />
+      <ArchetypeRadar
+        data={scaledCentroid}
+        slug={slug}
+        name={name}
+        withReferenceBands
+        showTooltip
+      />
 
       <span className="self-end group-hover:border-zinc-800 group-hover:bg-zinc-800 flex items-center border border-zinc-800 rounded-full justify-center m-0 p-0 transition-all duration-150 ease-in-out h-12 w-12">
         <Plus />

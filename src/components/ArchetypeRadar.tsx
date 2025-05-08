@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Radar,
   RadarChart,
@@ -32,10 +32,12 @@ export default function ArchetypeRadar({
   withReferenceBands = true,
   tickLabels = true,
 }: ArchetypeRadarProps) {
-  const chartData = data.map((d) => ({
-    dimension: d.dimension,
-    score: d[slug] as number,
-  }));
+  const chartData = useMemo(() => {
+    return data.map((d) => ({
+      dimension: d.dimension,
+      score: isFinite(d[slug] as number) ? d[slug] as number : 0,
+    }));
+  }, [data, slug]);
 
   // Hydration guard for tooltip
   const [mounted, setMounted] = useState(false);
