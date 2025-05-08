@@ -36,4 +36,17 @@ export const Plus = memo(forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>
   </IconBase>
 )));
 
+export const User = memo(forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>((props, ref) => (
+  <IconBase ref={ref} aria-label="User icon" {...props}>
+    <circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />
+  </IconBase>
+)));
+
+export const More = memo(forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>((props, ref) => (
+  <IconBase ref={ref} aria-label="More icon" {...props}>
+    <rect rx="1.25" x="3" y="7" />
+    <rect rx="1.25" x="3" y="15" />
+  </IconBase>
+)));
+
 
