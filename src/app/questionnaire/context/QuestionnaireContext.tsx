@@ -116,7 +116,19 @@ export function QuestionnaireProvider({ children }: { children: React.ReactNode 
       // Track double-neutral responses
       const isDoubleNeutral = value === 4;
       if (isDoubleNeutral) {
+        // Update state
         setDoubleNeutrals((prev) => [...prev, originalId]);
+        
+        // Also store in sessionStorage for blockchain integration
+        const currentDoubleNeutrals = JSON.parse(sessionStorage.getItem('p9_double_neutrals') || '[]');
+        if (!currentDoubleNeutrals.includes(originalId)) {
+          sessionStorage.setItem(
+            'p9_double_neutrals', 
+            JSON.stringify([...currentDoubleNeutrals, originalId])
+          );
+        }
+        
+        console.log(`Detected double-neutral response for question ${originalId}`);
       }
       
       // Save follow-up answer to DB
