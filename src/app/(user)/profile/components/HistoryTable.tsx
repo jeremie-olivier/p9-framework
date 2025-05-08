@@ -9,6 +9,7 @@ interface Assessment {
   id: string;
   archetype: string;
   createdAt: string;
+  dimensionScores?: Record<string, number>;
 }
 
 interface Props {
@@ -63,6 +64,18 @@ export default function HistoryTable({ assessments }: Props) {
                         month: "short",
                         day: "numeric",
                       }).format(new Date(selected.createdAt))}</p>
+                      {selected.dimensionScores && (
+                        <div>
+                          <h4 className="font-medium mt-4">Dimension Scores</h4>
+                          <ul className="list-disc list-inside">
+                            {Object.entries(selected.dimensionScores).map(([key, value]) => (
+                              <li key={key}>
+                                {key}: {value.toFixed(2)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </DialogContent>

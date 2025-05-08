@@ -5,41 +5,22 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { computeProfile, computeDimensionAverages } from "@/lib/scoring";
+import { useAssessmentScores } from "@/hooks/useAssessmentScores";
 import DimensionRadar from "@/components/DimensionRadar";
 import PracticalApplications from "@/components/PracticalApplications";
 import PersonalizedInsights from "@/components/PersonalizedInsights";
 import LabelFeedback from "@/components/LabelFeedback";
 import { ArchetypeAvatars } from "@/components/ArchetypeAvatars";
-import { SaveBanner } from "@/components/SaveBanner";
+import { SaveArchetype } from "@/components/SaveArchetype";
 
 // Must match STORAGE_ANS from the questionnaire page
 const STORAGE_ANS = "p9_answers";
-
-type RawProfileItem = {
-  slug: string;
-  name: string;
-  description: string;
-  strengths: string[];
-  challenges: string[];
-  recommendations: string[];
-  applications: {
-    growth: string[];
-    collaboration: string[];
-    career: string[];
-  };
-  score: number;
-  rank: number;
-  primaryLabel?: string;
-};
 
 export default function ResultsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
   const [answers, setAnswers] = useState<Record<string, number> | null>(null);
-  const [dimData, setDimData] = useState<{ dimension: string; score: number }[]>([]);
-  const [profile, setProfile] = useState<RawProfileItem[] | null>(null);
 
   // 1) Load answers from sessionStorage on mount
   useEffect(() => {
@@ -58,17 +39,9 @@ export default function ResultsPage() {
       return;
     }
     setAnswers(parsed);
-
-    // dimension averages → radar
-    const avgs = computeDimensionAverages(parsed);
-    setDimData(
-      Object.entries(avgs).map(([dimension, score]) => ({ dimension, score }))
-    );
-
-    // full archetype profile → sorted
-    const prof = computeProfile(parsed) as RawProfileItem[];
-    setProfile(prof);
   }, [router]);
+
+  const { dimData, profile } = useAssessmentScores(answers);
 
   // 2) Loading states
   if (answers === null || profile === null) {
@@ -87,7 +60,7 @@ export default function ResultsPage() {
         <h2 className="text-2xl font-bold">
           Your results are ready — save them to your profile!
         </h2>
-        <SaveBanner />
+        <SaveArchetype />
       </section>
 
       {/* Header */}
@@ -114,20 +87,22 @@ export default function ResultsPage() {
       </section>
 
       {/* Primary Archetype Detail */}
-      <section className="bg-blue-50 p-4 rounded shadow flex items-start space-x-4">
-        <div>{ArchetypeAvatars[primary.slug]}</div>
-        <div>
-          <h3 className="text-xl font-semibold">{primary.name}</h3>
-          <p className="mt-1 mb-2">Score: {primary.score.toFixed(2)}</p>
-          <p className="mb-4">{primary.description}</p>
-          <Link
-            href={`/archetype/${primary.slug}`}
-            className="inline-block bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Learn More
-          </Link>
-        </div>
-      </section>
+      {primary && (
+        <section className="bg-blue-50 p-4 rounded shadow flex items-start space-x-4">
+          <div>{ArchetypeAvatars[primary.slug]}</div>
+          <div>
+            <h3 className="text-xl font-semibold">{primary.name}</h3>
+            <p className="mt-1 mb-2">Score: {primary.score.toFixed(2)}</p>
+            <p className="mb-4">{primary.description}</p>
+            <Link
+              href={`/archetype/${primary.slug}`}
+              className="inline-block bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Learn More
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Other Archetypes */}
       <section>
