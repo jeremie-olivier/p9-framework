@@ -95,7 +95,7 @@ function computeDistances(
   for (const [slug, centroids] of Object.entries(archetypeCentroids)) {
     let sumSq = 0;
     centroids.forEach(c => {
-      const dim = c.dimension;
+      const dim = c.dimension as Dimension;
       const u = scaleScoreTo100(user[dim] ?? 0);
       const cent = c[slug] as number;
       sumSq += (u - cent) ** 2;
@@ -105,6 +105,14 @@ function computeDistances(
   return distances;
 };
 
+// Helper: Get user's top N traits by dimension average
+function getTopTraits(user: Record<Dimension, number>, count = 3): Dimension[] {
+  return Object.entries(user)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, count)
+    .map(([dim]) => dim as Dimension);
+}
+
 export function computeArchetypeScores(
   dimAvgs: Record<Dimension, number>
 ): Record<string, number> {
@@ -112,11 +120,18 @@ export function computeArchetypeScores(
   // normalize to similarity 0–1
   const maxDist = Math.max(...Object.values(distances));
   const scores: Record<string, number> = {};
+  const topTraits: Dimension[] = getTopTraits(dimAvgs);
   Object.entries(distances).forEach(([slug, d]) => {
-    scores[slug] = maxDist > 0 ? (maxDist - d) / maxDist : 0;
+    const baseScore = maxDist > 0 ? (maxDist - d) / maxDist : 0;
+    // Find archetype's primaryTraits
+    const archetype = archetypes.find(a => a.slug === slug);
+    const matchBoost =
+      archetype?.primaryTraits?.filter(t => topTraits.includes(t)).length ?? 0;
+    const traitBoost = matchBoost * 0.05; // Each trait match adds 5%
+    scores[slug] = Math.min(baseScore + traitBoost, 1);
   });
   return scores;
-};
+}
 
 // 5) Label rules engine
 interface LabelRule { condition: (s: number[]) => boolean; formatter: (n: string[]) => string; }

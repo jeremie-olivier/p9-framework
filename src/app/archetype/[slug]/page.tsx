@@ -50,7 +50,7 @@ export default function ArchetypePage({ params }: ArchetypePageProps) {
       {/* Title & Description */}
       <section className="text-center space-y-2">
         <h1 id={`archetype-${archetype.slug}`} className="text-4xl font-bold">{archetype.name}</h1>
-        <p className="text-gray-700">{archetype.description}</p>
+        <p className="text-gray-700 text-lg">{archetype.signature}</p>
       </section>
 
       {/* Radar Chart */}
@@ -69,34 +69,52 @@ export default function ArchetypePage({ params }: ArchetypePageProps) {
         </div>
       </section>
 
-      {/* Strengths */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-2">Strengths</h2>
-        <ul className="list-disc list-inside text-gray-800 space-y-1">
-          {archetype.strengths.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ul>
-      </section>
+      {/* Psychometric Profile */}
+      <section aria-labelledby="psychometric-profile-heading" className="space-y-8">
+        <h2 id="psychometric-profile-heading" className="text-2xl font-semibold">Psychometric Profile</h2>
+        <p className="text-gray-700">{archetype.description}</p>
+        <div className="mt-2 text-sm text-zinc-600 space-y-1">
+          {archetype.cognitiveFrame && (
+            <p>
+              <span className="font-semibold">Cognitive frame:</span> {archetype.cognitiveFrame}
+            </p>
+          )}
+          {archetype.primaryTraits && (
+            <p>
+              <span className="font-semibold">Primary traits:</span> {archetype.primaryTraits.join(", ")}
+            </p>
+          )}
+        </div>
 
-      {/* Challenges */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-2">Challenges</h2>
-        <ul className="list-disc list-inside text-gray-800 space-y-1">
-          {archetype.challenges.map((c) => (
-            <li key={c}>{c}</li>
-          ))}
-        </ul>
-      </section>
+        {/* Strengths */}
+        <section>
+          <h3 className="text-xl font-semibold mb-2">Strengths</h3>
+          <ul className="list-disc list-inside text-gray-800 space-y-1">
+            {archetype.strengths.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        </section>
 
-      {/* Recommendations */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-2">Recommendations</h2>
-        <ul className="list-disc list-inside text-gray-800 space-y-1">
-          {archetype.recommendations.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
+        {/* Challenges */}
+        <section>
+          <h3 className="text-xl font-semibold mb-2">Challenges</h3>
+          <ul className="list-disc list-inside text-gray-800 space-y-1">
+            {archetype.challenges.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Recommendations */}
+        <section>
+          <h3 className="text-xl font-semibold mb-2">Recommendations</h3>
+          <ul className="list-disc list-inside text-gray-800 space-y-1">
+            {archetype.recommendations.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+        </section>
       </section>
 
       {/* Back Link */}

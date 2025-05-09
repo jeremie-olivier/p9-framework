@@ -45,6 +45,21 @@ export function ArchetypeCard({ slug, centroid }: Props) {
         showTooltip
       />
 
+      <div className="mt-4 text-center text-xs text-zinc-400">
+        {archetype.cognitiveFrame && (
+          <p className="mb-1">
+            <span className="font-medium text-zinc-300">Cognitive frame:</span>{" "}
+            {archetype.cognitiveFrame}
+          </p>
+        )}
+        {archetype.primaryTraits && (
+          <p>
+            <span className="font-medium text-zinc-300">Primary traits:</span>{" "}
+            {archetype.primaryTraits.join(", ")}
+          </p>
+        )}
+      </div>
+      
       <span className="self-end group-hover:border-zinc-800 group-hover:bg-zinc-800 flex items-center border border-zinc-800 rounded-full justify-center m-0 p-0 transition-all duration-150 ease-in-out h-12 w-12">
         <Plus />
       </span>
