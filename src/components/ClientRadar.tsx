@@ -53,11 +53,11 @@ export default function ClientRadar({ data, slug, name }: Props) {
       onMouseLeave={handleMouseLeave}
     >
       <PolarGrid />
-      <PolarAngleAxis dataKey="dimension" tick={false} />
+      <PolarAngleAxis name="Score"  dataKey="dimension" tick={false} />
       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
 
       <Radar
-        name={name}
+        name="Score"
         dataKey="score"
         stroke="#4F46E5"
         fill="#4F46E5"
@@ -71,7 +71,7 @@ export default function ClientRadar({ data, slug, name }: Props) {
           // Outer wrapper (to disable pointer events, etc.)
           wrapperStyle={{
             pointerEvents: "none",
-            transition: "opacity 200ms ease-out",
+            transition: "opacity 150ms ease-in-out",
             opacity: tooltipPos ? 1 : 0,
           }}
           // Tooltip “box” itself
@@ -83,7 +83,6 @@ export default function ClientRadar({ data, slug, name }: Props) {
           }}
           // Style the “label” line (i.e. dimension name)
           labelStyle={{
-            color: "#fff",
             fontSize: "0.85rem",
             marginBottom: 4,
           }}
@@ -92,6 +91,8 @@ export default function ClientRadar({ data, slug, name }: Props) {
             color: "#fff",
             fontSize: "1rem",
           }}
+          labelFormatter={() => name}
+          formatter={(value, key) => [`${value}`, `${key}`]}
         />
       )}
     </RadarChart>
