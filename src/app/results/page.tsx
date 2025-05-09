@@ -122,7 +122,7 @@ export default function ResultsPage() {
               </p>
             )}
             <Link
-              href={`/archetype/${primary.slug}`}
+              href={`/archetypes/${primary.slug}`}
               className="inline-block bg-blue-500 text-white px-4 py-2 rounded"
             >
               Learn More

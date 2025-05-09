@@ -115,7 +115,7 @@ export const archetypeCentroids: Record<string, Centroid[]> = {
     { dimension: "Extraversion", mediator: 55 }, // Moderate extraversion supports group facilitation (Costa & McCrae, 1992)
     { dimension: "Conscientiousness", mediator: 65 }, // Moderately high conscientiousness for reliability (Costa & McCrae, 1992)
     { dimension: "Agreeableness", mediator: 89 }, // Very high agreeableness is essential for mediation (Costa & McCrae, 1992)
-    { dimension: "Emotionality", mediator: 83.6 }, // Very high emotionality fosters empathy (Ashton & Lee, 2007)
+    { dimension: "Emotionality", mediator: 84 }, // Very high emotionality fosters empathy (Ashton & Lee, 2007)
     { dimension: "Adaptability", mediator: 80 }, // High adaptability enables flexibility in conflict resolution (Ashton & Lee, 2007)
     { dimension: "Honesty-Humility", mediator: 81 }, // High humility supports fairness and trust (Ashton & Lee, 2007)
     { dimension: "Analytical", mediator: 50 }, // Moderate analytical ability for balanced judgment (Kruglanski et al., 2018)

@@ -5,7 +5,7 @@ import { archetypeCentroids } from "@/lib/archetypeCentroids";
 import { ArchetypeCard } from "./ArchetypeCard";
 import type { ArchetypeSlug } from "./ArchetypeAvatars";
 
-export function ArchetypeGrid() {
+export function ArchetypeGrid({ archetypes }: { archetypes: Archetype[] }) {
   return (
     <section className="py-8">
       <h2 className="text-3xl font-bold text-center mb-10 text-white">

@@ -27,7 +27,7 @@ export function ArchetypeCard({ slug, centroid }: Props) {
 
   return (
     <Link
-      href={`/archetype/${slug}`}
+      href={`/archetypes/${slug}`}
       className="group rounded-2xl bg-zinc-900 border hover:bg-zinc-800/60 border-zinc-800 p-6 shadow hover:shadow-lg transition flex flex-col items-center"
     >
       <div className="mb-4 w-16 h-16">
