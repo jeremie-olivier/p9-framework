@@ -16,7 +16,13 @@ const defaultAttrs = {
 };
 
 export const IconBase = forwardRef<SVGSVGElement, IconBaseProps>(
-  ({ viewBox = '0 0 24 24', width = 24, height = 24, children, ...props }, ref) => (
+  ({
+    viewBox = '0 0 24 24',
+    width = "24px",
+    height = "24px",
+    children,
+    ...props
+  }, ref) => (
     <svg
       ref={ref}
       viewBox={viewBox}

@@ -19,7 +19,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "visionary",
     name: "Visionary",
-    signature: "Future-focused ideation",
+    signature: "Strategic vision generation",
     description:
       "Creative, forward-thinking ideators who envision bold futures and possibilities.",
     strengths: [
@@ -79,7 +79,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "innovator",
     name: "Innovator",
-    signature: "Structured creativity",
+    signature: "Systematic innovation",
     description:
       "Systematic creators who blend analytical rigor with creative solutions to optimize processes.",
     strengths: [
@@ -139,7 +139,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "integrator",
     name: "Integrator",
-    signature: "Versatile problem-solving",
+    signature: "Adaptive team unification",
     description:
       "Versatile collaborators who adapt fluidly to roles and bridge diverse perspectives.",
     strengths: [
@@ -199,7 +199,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "commander",
     name: "Commander",
-    signature: "Directive leadership",
+    signature: "Goal-driven authority",
     description:
       "Assertive leaders who drive teams toward high-stakes goals with discipline and authority.",
     strengths: [
@@ -259,7 +259,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "influencer",
     name: "Influencer",
-    signature: "Empathic persuasion",
+    signature: "Relational persuasion",
     description:
       "Empathic networkers who excel at persuasion, relationship building, and community engagement.",
     strengths: [
@@ -319,7 +319,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "strategist",
     name: "Strategist",
-    signature: "Long-term planning",
+    signature: "Analytical foresight",
     description:
       "Long-term planners who evaluate risks and opportunities to chart optimal pathways forward.",
     strengths: [
@@ -379,7 +379,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "investigator",
     name: "Investigator",
-    signature: "Rigorous inquiry",
+    signature: "Ethical deep inquiry",
     description:
       "Inquisitive researchers driven by ethical rigor and deep analytical inquiry.",
     strengths: [
@@ -439,7 +439,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "mediator",
     name: "Mediator",
-    signature: "Team harmony",
+    signature: "Compassionate conflict navigation",
     description:
       "Compassionate harmonizers who navigate conflicts and foster cooperative environments.",
     strengths: [
@@ -499,7 +499,7 @@ export const archetypes: Archetype[] = [
   {
     slug: "guardian",
     name: "Guardian",
-    signature: "Reliable execution",
+    signature: "Structured operational reliability",
     description:
       "Dependable executors who ensure stability, compliance, and ethical standards.",
     strengths: [
