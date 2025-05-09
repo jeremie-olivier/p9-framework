@@ -1,4 +1,4 @@
-import { questions } from "@/app/questionnaire/components/questions";
+import { questions } from "@/app/assessment/components/questions";
 import { archetypes, Archetype } from "./archetypes";
 import { Dimension, archetypeCentroids } from "./archetypeCentroids";
 import { z } from "zod";

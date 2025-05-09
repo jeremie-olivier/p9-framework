@@ -15,7 +15,7 @@ import LabelFeedback from "@/components/LabelFeedback";
 import { ArchetypeAvatars } from "@/components/ArchetypeAvatars";
 import { SaveArchetype } from "@/components/SaveArchetype";
 
-// Must match STORAGE_ANS from the questionnaire page
+// Must match STORAGE_ANS from the assessment page
 const STORAGE_ANS = "p9_answers";
 
 export default function ResultsPage() {
@@ -30,14 +30,14 @@ export default function ResultsPage() {
     const raw = sessionStorage.getItem(STORAGE_ANS);
     if (!raw) {
       // nothing to show → redirect back
-      router.replace("/questionnaire");
+      router.replace("/assessment");
       return;
     }
     let parsed: Record<string, number>;
     try {
       parsed = JSON.parse(raw);
     } catch {
-      router.replace("/questionnaire");
+      router.replace("/assessment");
       return;
     }
     setAnswers(parsed);
@@ -68,7 +68,7 @@ export default function ResultsPage() {
       {/* Header */}
       <header className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Your P9 Profile</h2>
-        <Link href="/questionnaire" className="text-sm text-blue-500 underline">
+        <Link href="/assessment" className="text-sm text-blue-500 underline">
           Retake Test
         </Link>
       </header>
