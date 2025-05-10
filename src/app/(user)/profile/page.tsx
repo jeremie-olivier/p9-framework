@@ -48,12 +48,12 @@ export default async function ProfilePage() {
   const latest = assessments[0] ?? null;
 
   // 5) Precompute chart & profile for the latest
-  let dimData: { dimension: string; score: number }[] = [];
+  let dimData: { dimension: string; user: number }[] = [];
   let primary: { slug: string; name: string; score: number; description: string } | null = null;
 
   if (latest) {
     const avgs = computeDimensionAverages(latest.answers as Record<string, number>);
-    dimData = Object.entries(avgs).map(([dimension, score]) => ({ dimension, score }));
+    dimData = Object.entries(avgs).map(([dimension, score]) => ({ dimension, user: score }));
     const prof = computeProfile(latest.answers as Record<string, number>);
     primary = prof[0];
   }
@@ -65,13 +65,13 @@ export default async function ProfilePage() {
       {/* 🌟 Latest assessment summary */}
       {latest ? (
         <section className="space-y-4">
-          <h2 className="text-2xl">Last Assessment ({latest.createdAt.toLocaleDateString()})</h2>
+          <h2 className="text-2xl">Last Assessment ({new Date(latest.createdAt).toLocaleDateString()})</h2>
 
           <div className="flex flex-wrap gap-6">
             {/* Radar */}
             <div>
               <ArchetypeRadar
-                data={dimData.map(d => ({ dimension: d.dimension, user: d.score }))}
+                data={dimData}
                 slug="user"
                 name="Your Scores"
                 withReferenceBands
@@ -98,19 +98,29 @@ export default async function ProfilePage() {
           </div>
         </section>
       ) : (
-        <p>You haven’t taken a test yet.</p>
+        <p>You haven't taken a test yet.</p>
       )}
 
       {/* 📜 History table */}
       <HistoryTable assessments={serializedAssessments} />
 
       {/* 🔗 Wallet connect */}
-      {!user?.ethAddress && (
-        <section>
-          <h2 className="text-xl font-medium mb-2">Connect your Ethereum wallet</h2>
+      <section>
+        <h2 className="text-xl font-medium mb-2">Connect your Ethereum wallet</h2>
+        {user?.ethAddress ? (
+          <div>
+            <p>Connected: <code>{user.ethAddress}</code></p>
+            <button
+              className="text-sm text-blue-600 underline mt-2"
+              onClick={() => {}}
+            >
+              Disconnect
+            </button>
+          </div>
+        ) : (
           <WalletConnect />
-        </section>
-      )}
+        )}
+      </section>
     </div>
   );
 }

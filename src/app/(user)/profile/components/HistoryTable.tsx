@@ -55,43 +55,39 @@ function AssessmentDialog({ assessment }: { assessment: Assessment }) {
 }
 
 export default function HistoryTable({ assessments }: Props) {
-  const [selected, setSelected] = useState<Assessment | null>(null);
-
-  const isFlatAnswerMap = selected?.answers && typeof selected.answers === "object" && !Array.isArray(selected.answers);
-
-  const dimScores = useMemo(() => {
-    return isFlatAnswerMap ? Object.entries(computeAssessmentScores(selected!.answers).dimData).map(([dimension, score]) => ({ dimension, score })) : [];
-  }, [selected]);
-
   if (assessments.length === 0) {
     return <p>No previous assessments.</p>;
   }
+  
   return (
-    <table className="w-full table-auto border-collapse">
-      <thead>
-        <tr className="bg-zinc-100">
-          <th className="p-2 text-left">Date</th>
-          <th className="p-2 text-left">Archetype</th>
-          <th className="p-2"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {assessments.map((a) => (
-          <tr key={a.id} className="border-t">
-            <td className="p-2">
-              {new Intl.DateTimeFormat("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }).format(new Date(a.createdAt))}
-            </td>
-            <td className="p-2">{a.archetype}</td>
-            <td className="p-2 text-right">
-              <AssessmentDialog assessment={a} />
-            </td>
+    <div>
+      <h2 className="text-xl font-semibold mb-3">Assessment History</h2>
+      <table className="w-full table-auto border-collapse">
+        <thead>
+          <tr className="bg-zinc-100 dark:bg-zinc-800">
+            <th className="p-2 text-left">Date</th>
+            <th className="p-2 text-left">Archetype</th>
+            <th className="p-2"></th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {assessments.map((a) => (
+            <tr key={a.id} className="border-t dark:border-zinc-700">
+              <td className="p-2">
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }).format(new Date(a.createdAt))}
+              </td>
+              <td className="p-2">{a.archetype}</td>
+              <td className="p-2 text-right">
+                <AssessmentDialog assessment={a} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

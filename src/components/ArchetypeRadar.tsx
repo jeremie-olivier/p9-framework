@@ -34,7 +34,7 @@ export default function ArchetypeRadar({
 }: ArchetypeRadarProps) {
   const chartData = data.map((d) => ({
     dimension: d.dimension,
-    score: d[slug] as number,
+    [slug]: d[slug] as number,
   }));
 
   // Hydration guard for tooltip
@@ -51,6 +51,7 @@ export default function ArchetypeRadar({
   useEffect(() => {
     setMounted(true);
   }, []);
+  
   if (!mounted) return null;
 
   return (
@@ -63,7 +64,10 @@ export default function ArchetypeRadar({
       onMouseLeave={handleMouseLeave}
     >
       <PolarGrid />
-      <PolarAngleAxis dataKey="dimension" tick={tickLabels ? { fontSize: 12 } : false} />
+      <PolarAngleAxis 
+        dataKey="dimension" 
+        tick={tickLabels ? { fontSize: 12, fill: "#fff" } : false} 
+      />
       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
       {withReferenceBands && (
         <>
@@ -94,7 +98,8 @@ export default function ArchetypeRadar({
         </>
       )}
       <Radar
-        dataKey="score"
+        name={name}
+        dataKey={slug}
         stroke="#3a5fcd"
         fill="#3a5fcd"
         fillOpacity={0.8}
