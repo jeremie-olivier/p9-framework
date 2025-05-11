@@ -1,9 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { ArchetypeGrid } from "@/components/ArchetypeGrid";
 import { archetypes } from "@/lib/archetypes";
 import { Button } from "@/components/ui/Button";
+import { useContainerSize } from './hooks/useContainerSize';
+import DynamicGraph from './components/ForceGraph3D';
 
 export default function Home() {
+  const { containerRef, dimensions } = useContainerSize();
+
   return (
     <>
       <div className="flex flex-col items-center justify-center gap-12">
@@ -44,6 +50,20 @@ export default function Home() {
         className="grid items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"
       >
         <ArchetypeGrid archetypes={archetypes} />
+      </div>
+
+      <div 
+        ref={containerRef}
+        style={{ 
+          width: '100%', 
+          height: '100vh',
+          position: 'relative'
+        }}
+      >
+        <DynamicGraph 
+          width={dimensions.width} 
+          height={dimensions.height} 
+        />
       </div>
     </>
   );

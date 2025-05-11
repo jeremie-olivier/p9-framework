@@ -8,6 +8,7 @@ import { track } from "@vercel/analytics";
 import Question from "./components/Question";
 import { questions } from "./components/questions";
 import DynamicGraph from "../components/ForceGraph3D";
+import { useContainerSize } from '../hooks/useContainerSize';
 
 const ANIM = { duration: 0.3 };
 const STORAGE_ANS = "p9_answers";
@@ -17,6 +18,7 @@ const STORAGE_TEST = "p9_testId";
 export default function Assessment() {
   const router = useRouter();
   const total = questions.length;
+  const { containerRef, dimensions } = useContainerSize();
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -116,7 +118,19 @@ export default function Assessment() {
       )}
 
       <div className="mb-8 h-[200px] w-full relative overflow-hidden rounded-lg">
-        <DynamicGraph />
+        <div 
+          ref={containerRef}
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            position: 'relative'
+          }}
+        >
+          <DynamicGraph 
+            width={dimensions.width} 
+            height={dimensions.height} 
+          />
+        </div>
       </div>
 
       <AnimatePresence initial={false}>

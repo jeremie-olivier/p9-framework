@@ -1,22 +1,44 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import * as THREE from 'three';
+import { useSubscription } from '@apollo/client';
+import gql from 'graphql-tag';
 
-// Dynamically import ForceGraph3D to avoid SSR issues
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
-  ssr: false,
-  loading: () => <div>Loading graph...</div>
-});
+interface ForceGraph3DInstance {
+  cameraPosition: (pos: { x?: number; y?: number; z?: number }) => void;
+}
+
+interface ForceGraph3DProps {
+  ref?: React.RefCallback<ForceGraph3DInstance>;
+  enableNodeDrag?: boolean;
+  graphData: GraphData;
+  width: number;
+  height: number;
+  nodeColor: () => string;
+  nodeRelSize: number;
+  nodeLabel: string;
+  linkColor: () => string;
+  linkWidth: number;
+  backgroundColor: string;
+  onEngineStop?: () => void;
+  showNavInfo?: boolean;
+}
+
+// @ts-expect-error ssr
+const ForceGraph3D = dynamic(() => import('react-force-graph').then(mod => mod.ForceGraph3D), {
+  ssr: false
+}) as React.ComponentType<ForceGraph3DProps>;
 
 interface Node {
-  id: number;
+  id: string;
+  label: string;
 }
 
 interface Link {
-  source: number;
-  target: number;
+  source: string;
+  target: string;
+  label: string;
 }
 
 interface GraphData {
@@ -24,101 +46,169 @@ interface GraphData {
   links: Link[];
 }
 
-export default function DynamicGraph() {
+interface Atom {
+  label: string;
+  __typename: string;
+}
+
+interface Claim {
+  subject: Atom;
+  predicate: Atom;
+  object: Atom;
+  __typename: string;
+}
+
+interface DynamicGraphProps {
+  width: number;
+  height: number;
+}
+
+const CLAIMS_SUBSCRIPTION = gql`
+  subscription Subscription_root($where: claims_bool_exp) {
+    claims(where: $where) {
+      subject {
+        label
+        __typename
+      }
+      predicate {
+        label
+        __typename
+      }
+      object {
+        label
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+
+export default function DynamicGraph({ width, height }: DynamicGraphProps) {
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<GraphData>({ nodes: [{ id: 0 }], links: [] });
+  const fgRef = useRef<ForceGraph3DInstance | null>(null);
+  const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
+  const nodeMapRef = useRef<Map<string, Node>>(new Map());
+  const [isGraphLoaded, setIsGraphLoaded] = useState(false);
+
+  const distance = 600;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Add a new connected node every second
-      setData(({ nodes, links }) => {
-        const id = nodes.length;
-        return {
-          nodes: [...nodes, { id }],
-          links: [...links, { source: id, target: Math.round(Math.random() * (id-1)) }]
-        };
+    if (!fgRef.current) return;
+
+    fgRef.current.cameraPosition({ z: distance });
+
+    // camera orbit
+    let angle = 0;
+    const intervalId = setInterval(() => {
+      if (!fgRef.current) return;
+      fgRef.current.cameraPosition({
+        x: distance * Math.sin(angle),
+        z: distance * Math.cos(angle)
       });
-    }, 1000);
+      angle += Math.PI / 1500;
+    }, 10);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(intervalId);
+  }, [isGraphLoaded]);
 
-  const handleClick = useCallback((node: Node) => {
-    const { nodes, links } = data;
+  const { data: subscriptionData, loading, error } = useSubscription(CLAIMS_SUBSCRIPTION, {
+    variables: {
+      where: {
+        account_id: {
+          _eq: "0x25d5c9dbc1e12163b973261a08739927e4f72ba8"
+        }
+      }
+    }
+  });
 
-    // Remove node on click
-    const newLinks = links.filter(l => l.source !== node.id && l.target !== node.id); // Remove links attached to node
-    const newNodes = nodes.slice();
-    newNodes.splice(node.id, 1); // Remove node
-    newNodes.forEach((n, idx) => { n.id = idx; }); // Reset node ids to array index
+  useEffect(() => {
+    if (subscriptionData?.claims) {
+      const claims = subscriptionData.claims as Claim[];
 
-    setData({ nodes: newNodes, links: newLinks });
-  }, [data]);
+      // Reset the node map and data for a fresh start
+      nodeMapRef.current.clear();
+      const newNodes: Node[] = [];
+      const newLinks: Link[] = [];
+
+      // First pass: create all nodes
+      claims.forEach(claim => {
+        // Add subject node
+        if (!nodeMapRef.current.has(claim.subject.label)) {
+          const subjectNode = { id: claim.subject.label, label: claim.subject.label };
+          newNodes.push(subjectNode);
+          nodeMapRef.current.set(claim.subject.label, subjectNode);
+        }
+
+        // Add object node
+        if (!nodeMapRef.current.has(claim.object.label)) {
+          const objectNode = { id: claim.object.label, label: claim.object.label };
+          newNodes.push(objectNode);
+          nodeMapRef.current.set(claim.object.label, objectNode);
+        }
+      });
+
+      // Second pass: create all links
+      claims.forEach(claim => {
+        const link = {
+          source: claim.subject.label,
+          target: claim.object.label,
+          label: claim.predicate.label
+        };
+        newLinks.push(link);
+      });
+
+      console.log('Final graph data:', {
+        nodes: newNodes,
+        links: newLinks,
+        nodeCount: newNodes.length,
+        linkCount: newLinks.length
+      });
+
+      setData({ nodes: newNodes, links: newLinks });
+    }
+  }, [subscriptionData]);
+
+  if (loading) return <div>Loading subscription...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <ForceGraph3D
-        enableNodeDrag={false}
-        onNodeClick={handleClick}
-        graphData={data}
-        width={containerRef.current?.clientWidth}
-        height={containerRef.current?.clientHeight}
-        nodeColor={() => '#3b82f6'}
-        nodeRelSize={40}
-        nodeLabel="id"
-        linkColor={() => 'rgba(59, 130, 246, 0.4)'}
-        linkWidth={3}
-        linkDirectionalParticles={3}
-        linkDirectionalParticleSpeed={0.01}
-        backgroundColor="#000000"
-        nodeThreeObject={node => {
-          const group = new THREE.Group();
-
-          // Create the main sphere with emissive material
-          const geometry = new THREE.SphereGeometry(4, 32, 32);
-          const material = new THREE.MeshPhongMaterial({
-            color: 0x3b82f6,
-            emissive: 0x3b82f6,
-            emissiveIntensity: 2,
-            shininess: 150,
-            transparent: true,
-            opacity: 0.95
-          });
-          const sphere = new THREE.Mesh(geometry, material);
-          group.add(sphere);
-
-          // Add multiple point lights for better glow
-          const light1 = new THREE.PointLight(0x3b82f6, 4, 20);
-          light1.position.set(0, 0, 0);
-          group.add(light1);
-
-          const light2 = new THREE.PointLight(0x3b82f6, 2, 15);
-          light2.position.set(2, 2, 2);
-          group.add(light2);
-
-          const light3 = new THREE.PointLight(0x3b82f6, 2, 15);
-          light3.position.set(-2, -2, -2);
-          group.add(light3);
-
-          const light4 = new THREE.PointLight(0x3b82f6, 2, 15);
-          light4.position.set(2, -2, 2);
-          group.add(light4);
-
-          const light5 = new THREE.PointLight(0x3b82f6, 2, 15);
-          light5.position.set(-2, 2, -2);
-          group.add(light5);
-
-          return group;
-        }}
-        onEngineStop={() => {
-          // Add ambient light to the scene
-          const scene = document.querySelector('canvas')?.parentElement;
-          if (scene) {
-            const ambientLight = new THREE.AmbientLight(0x3b82f6, 0.4);
-            scene.add(ambientLight);
-          }
-        }}
-      />
+    <div
+      ref={containerRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        backgroundColor: '#000000'
+      }}
+    >
+      {data.nodes.length > 0 ? (
+        <ForceGraph3D
+          ref={(el: ForceGraph3DInstance | null) => {
+            fgRef.current = el;
+            if (el) setIsGraphLoaded(true);
+          }}
+          enableNodeDrag={false}
+          graphData={data}
+          width={width}
+          height={height}
+          nodeColor={() => '#3b82f6'}
+          nodeRelSize={6}
+          nodeLabel="label"
+          linkColor={() => 'rgba(59, 130, 246, 0.4)'}
+          linkWidth={1}
+          backgroundColor="#000000"
+          onEngineStop={() => console.log('Engine stopped')}
+          showNavInfo={false}
+        />
+      ) : (
+        <div style={{ color: 'white', padding: '20px' }}>
+          No data available (Nodes: {data.nodes.length}, Links: {data.links.length})
+          <pre style={{ color: 'gray', fontSize: '12px', marginTop: '10px' }}>
+            {JSON.stringify(subscriptionData, null, 2)}
+          </pre>
+        </div>
+      )}
     </div>
   );
 } 
