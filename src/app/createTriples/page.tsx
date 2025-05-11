@@ -10,6 +10,8 @@ import { MULTIVAULT_CONTRACT_ADDRESS } from '@/consts'
 import { getMultivaultContractConfig } from '@/hooks/useMultivaultContract'
 import type { TransactionReceipt } from 'viem'
 import { useAccount } from 'wagmi'
+import { decodeEventLog } from 'viem'
+import { multivaultAbi } from '@/lib/abis/multivault'
 
 interface TripleStatus {
     id: number
@@ -51,9 +53,10 @@ export default function CreateTriplesPage() {
                 setTripleStatuses([...newStatuses])
 
                 await createTriple.writeContractAsync({
-                    ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
+                    address: MULTIVAULT_CONTRACT_ADDRESS,
+                    abi: multivaultAbi,
                     functionName: 'createTriple',
-                    args: [q.triple.subject.id, q.triple.predicate.type, q.triple.object.type],
+                    args: [q.triple.subject.id, q.triple.predicate.id, q.triple.object.id],
                     value: BigInt('690000000000000'), // 0.00069 ETH in wei
                     chainId: 84532 // Base Sepolia chain ID
                 })
@@ -65,32 +68,54 @@ export default function CreateTriplesPage() {
                     })
                 })
 
-                const tripleId = createReceipt.logs[0].topics[1] // Adjust based on your contract's event structure
-
-                newStatuses[i].createStatus = 'success'
-                newStatuses[i].tripleId = tripleId
-                setTripleStatuses([...newStatuses])
-
-                // Deposit triple
-                newStatuses[i].depositStatus = 'loading'
-                setTripleStatuses([...newStatuses])
-
-                await depositTriple.writeContractAsync({
-                    ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
-                    functionName: 'depositTriple',
-                    args: [address, tripleId], // Use user's address as receiver
-                    value: BigInt('690000000000000') // 0.00069 ETH in wei
-                })
-
-                // Wait for transaction receipt
-                await new Promise<TransactionReceipt>((resolve) => {
-                    depositTriple.onReceipt((receipt) => {
-                        resolve(receipt)
+                // Extract tripleId from the event logs
+                if (createReceipt?.logs[0].data) {
+                    const decodedLog = decodeEventLog({
+                        abi: multivaultAbi,
+                        data: createReceipt.logs[0].data,
+                        topics: createReceipt.logs[0].topics,
                     })
-                })
 
-                newStatuses[i].depositStatus = 'success'
-                setTripleStatuses([...newStatuses])
+                    const topics = decodedLog as unknown as {
+                        eventName: string
+                        args: {
+                            sender: string
+                            receiver?: string
+                            owner?: string
+                            vaultId: string
+                        }
+                    }
+
+                    const tripleId = topics.args.vaultId
+
+                    newStatuses[i].createStatus = 'success'
+                    newStatuses[i].tripleId = tripleId
+                    setTripleStatuses([...newStatuses])
+
+                    // Deposit triple
+                    newStatuses[i].depositStatus = 'loading'
+                    setTripleStatuses([...newStatuses])
+
+                    await depositTriple.writeContractAsync({
+                        address: MULTIVAULT_CONTRACT_ADDRESS,
+                        abi: multivaultAbi,
+                        functionName: 'depositTriple',
+                        args: [address, tripleId],
+                        value: BigInt('690000000000000') // 0.00069 ETH in wei
+                    })
+
+                    // Wait for transaction receipt
+                    await new Promise<TransactionReceipt>((resolve) => {
+                        depositTriple.onReceipt((receipt) => {
+                            resolve(receipt)
+                        })
+                    })
+
+                    newStatuses[i].depositStatus = 'success'
+                    setTripleStatuses([...newStatuses])
+                } else {
+                    throw new Error('Failed to decode transaction receipt')
+                }
             } catch (error) {
                 newStatuses[i].createStatus = 'error'
                 newStatuses[i].error = error instanceof Error ? error.message : 'Unknown error'

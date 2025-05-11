@@ -10,11 +10,11 @@ export const question = [
             },
             predicate: {
                 label: "manipulate",
-                type: 24344
+                id: 24344
             },
             object: {
                 label: "others for goals",
-                type: 24345
+                id: 24345
             }
         }
     },
@@ -29,11 +29,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "honesty",
-                type: 24347
+                id: 24347
             }
         }
     },
@@ -48,11 +48,11 @@ export const question = [
             },
             predicate: {
                 label: "avoid",
-                type: 24348
+                id: 24348
             },
             object: {
                 label: "pretending",
-                type: 24349
+                id: 24349
             }
         }
     },
@@ -67,11 +67,11 @@ export const question = [
             },
             predicate: {
                 label: "display",
-                type: 24350
+                id: 24350
             },
             object: {
                 label: "modesty",
-                type: 24351
+                id: 24351
             }
         }
     },
@@ -86,11 +86,11 @@ export const question = [
             },
             predicate: {
                 label: "sense",
-                type: 24352
+                id: 24352
             },
             object: {
                 label: "people's emotions",
-                type: 24353
+                id: 24353
             }
         }
     },
@@ -105,11 +105,11 @@ export const question = [
             },
             predicate: {
                 label: "experience",
-                type: 24354
+                id: 24354
             },
             object: {
                 label: "anxiety",
-                type: 24355
+                id: 24355
             }
         }
     },
@@ -124,11 +124,11 @@ export const question = [
             },
             predicate: {
                 label: "empathize",
-                type: 24356
+                id: 24356
             },
             object: {
                 label: "with others",
-                type: 24357
+                id: 24357
             }
         }
     },
@@ -143,11 +143,11 @@ export const question = [
             },
             predicate: {
                 label: "experience",
-                type: 24354
+                id: 24354
             },
             object: {
                 label: "emotion",
-                type: 24358
+                id: 24358
             }
         }
     },
@@ -162,11 +162,11 @@ export const question = [
             },
             predicate: {
                 label: "feel energized by",
-                type: 24359
+                id: 24359
             },
             object: {
                 label: "social activities",
-                type: 24360
+                id: 24360
             }
         }
     },
@@ -181,11 +181,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "company",
-                type: 24361
+                id: 24361
             }
         }
     },
@@ -200,11 +200,11 @@ export const question = [
             },
             predicate: {
                 label: "display",
-                type: 24350
+                id: 24350
             },
             object: {
                 label: "outgoing sociability",
-                type: 24362
+                id: 24362
             }
         }
     },
@@ -219,11 +219,11 @@ export const question = [
             },
             predicate: {
                 label: "enjoy",
-                type: 24363
+                id: 24363
             },
             object: {
                 label: "social interaction",
-                type: 24364
+                id: 24364
             }
         }
     },
@@ -238,11 +238,11 @@ export const question = [
             },
             predicate: {
                 label: "forgive",
-                type: 24365
+                id: 24365
             },
             object: {
                 label: "others",
-                type: 24366
+                id: 24366
             }
         }
     },
@@ -257,11 +257,11 @@ export const question = [
             },
             predicate: {
                 label: "cooperate",
-                type: 24367
+                id: 24367
             },
             object: {
                 label: "with others",
-                type: 24357
+                id: 24357
             }
         }
     },
@@ -276,11 +276,11 @@ export const question = [
             },
             predicate: {
                 label: "avoid",
-                type: 24348
+                id: 24348
             },
             object: {
                 label: "conflicts",
-                type: 24368
+                id: 24368
             }
         }
     },
@@ -295,11 +295,11 @@ export const question = [
             },
             predicate: {
                 label: "display",
-                type: 24350
+                id: 24350
             },
             object: {
                 label: "patience",
-                type: 24369
+                id: 24369
             }
         }
     },
@@ -314,11 +314,11 @@ export const question = [
             },
             predicate: {
                 label: "maintain",
-                type: 24370
+                id: 24370
             },
             object: {
                 label: "organization",
-                type: 24371
+                id: 24371
             }
         }
     },
@@ -333,11 +333,11 @@ export const question = [
             },
             predicate: {
                 label: "plan",
-                type: 24372
+                id: 24372
             },
             object: {
                 label: "tasks",
-                type: 24374
+                id: 24374
             }
         }
     },
@@ -352,11 +352,11 @@ export const question = [
             },
             predicate: {
                 label: "apply",
-                type: 24408
+                id: 24408
             },
             object: {
                 label: "discipline",
-                type: 24409
+                id: 24409
             }
         }
     },
@@ -371,11 +371,11 @@ export const question = [
             },
             predicate: {
                 label: "complete",
-                type: 24410
+                id: 24410
             },
             object: {
                 label: "tasks",
-                type: 24374
+                id: 24374
             }
         }
     },
@@ -390,11 +390,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "new ideas",
-                type: 24375
+                id: 24375
             }
         }
     },
@@ -409,11 +409,11 @@ export const question = [
             },
             predicate: {
                 label: "seek",
-                type: 24376
+                id: 24376
             },
             object: {
                 label: "creative experiences",
-                type: 24377
+                id: 24377
             }
         }
     },
@@ -428,11 +428,11 @@ export const question = [
             },
             predicate: {
                 label: "think about",
-                type: 24378
+                id: 24378
             },
             object: {
                 label: "abstract concepts",
-                type: 24379
+                id: 24379
             }
         }
     },
@@ -447,11 +447,11 @@ export const question = [
             },
             predicate: {
                 label: "explore",
-                type: 24380
+                id: 24380
             },
             object: {
                 label: "new topics",
-                type: 24381
+                id: 24381
             }
         }
     },
@@ -466,11 +466,11 @@ export const question = [
             },
             predicate: {
                 label: "trust",
-                type: 24382
+                id: 24382
             },
             object: {
                 label: "intuition",
-                type: 24383
+                id: 24383
             }
         }
     },
@@ -485,11 +485,11 @@ export const question = [
             },
             predicate: {
                 label: "analyze",
-                type: 24383
+                id: 24383
             },
             object: {
                 label: "situations",
-                type: 24385
+                id: 24385
             }
         }
     },
@@ -504,11 +504,11 @@ export const question = [
             },
             predicate: {
                 label: "rely on",
-                type: 24386
+                id: 24386
             },
             object: {
                 label: "logic",
-                type: 24387
+                id: 24387
             }
         }
     },
@@ -523,11 +523,11 @@ export const question = [
             },
             predicate: {
                 label: "am guided by",
-                type: 24388
+                id: 24388
             },
             object: {
                 label: "creative ideas",
-                type: 24411
+                id: 24411
             }
         }
     },
@@ -542,11 +542,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "outcomes",
-                type: 24412
+                id: 24412
             }
         }
     },
@@ -561,11 +561,11 @@ export const question = [
             },
             predicate: {
                 label: "ground",
-                type: 24413
+                id: 24413
             },
             object: {
                 label: "decisions in reality",
-                type: 24414
+                id: 24414
             }
         }
     },
@@ -580,11 +580,11 @@ export const question = [
             },
             predicate: {
                 label: "prefer",
-                type: 24415
+                id: 24415
             },
             object: {
                 label: "realism",
-                type: 24421
+                id: 24421
             }
         }
     },
@@ -599,11 +599,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "values",
-                type: 24422
+                id: 24422
             }
         }
     },
@@ -618,11 +618,11 @@ export const question = [
             },
             predicate: {
                 label: "think",
-                type: 24423
+                id: 24423
             },
             object: {
                 label: "strategically",
-                type: 24424
+                id: 24424
             }
         }
     },
@@ -637,11 +637,11 @@ export const question = [
             },
             predicate: {
                 label: "solve",
-                type: 24425
+                id: 24425
             },
             object: {
                 label: "problems",
-                type: 24426
+                id: 24426
             }
         }
     },
@@ -656,11 +656,11 @@ export const question = [
             },
             predicate: {
                 label: "plan",
-                type: 24372
+                id: 24372
             },
             object: {
                 label: "ahead",
-                type: 24373
+                id: 24373
             }
         }
     },
@@ -675,11 +675,11 @@ export const question = [
             },
             predicate: {
                 label: "prefer",
-                type: 24415
+                id: 24415
             },
             object: {
                 label: "quick solutions",
-                type: 24416
+                id: 24416
             }
         }
     },
@@ -694,11 +694,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "freedom",
-                type: 24417
+                id: 24417
             }
         }
     },
@@ -713,11 +713,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "feeling competent",
-                type: 24418
+                id: 24418
             }
         }
     },
@@ -732,11 +732,11 @@ export const question = [
             },
             predicate: {
                 label: "am motivated by",
-                type: 24419
+                id: 24419
             },
             object: {
                 label: "relationships",
-                type: 24420
+                id: 24420
             }
         }
     },
@@ -751,11 +751,11 @@ export const question = [
             },
             predicate: {
                 label: "am motivated by",
-                type: 24419
+                id: 24419
             },
             object: {
                 label: "recognition",
-                type: 24427
+                id: 24427
             }
         }
     },
@@ -770,11 +770,11 @@ export const question = [
             },
             predicate: {
                 label: "am driven by",
-                type: 24428
+                id: 24428
             },
             object: {
                 label: "status",
-                type: 24429
+                id: 24429
             }
         }
     },
@@ -789,11 +789,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "security",
-                type: 24430
+                id: 24430
             }
         }
     },
@@ -808,11 +808,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "creativity",
-                type: 24431
+                id: 24431
             }
         }
     },
@@ -827,11 +827,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "stability",
-                type: 24432
+                id: 24432
             }
         }
     },
@@ -846,11 +846,11 @@ export const question = [
             },
             predicate: {
                 label: "seek",
-                type: 24376
+                id: 24376
             },
             object: {
                 label: "adventure",
-                type: 24433
+                id: 24433
             }
         }
     },
@@ -865,11 +865,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "relationships",
-                type: 24420
+                id: 24420
             }
         }
     },
@@ -884,11 +884,11 @@ export const question = [
             },
             predicate: {
                 label: "am guided by",
-                type: 24388
+                id: 24388
             },
             object: {
                 label: "ethics",
-                type: 24389
+                id: 24389
             }
         }
     },
@@ -903,11 +903,11 @@ export const question = [
             },
             predicate: {
                 label: "am shaped by",
-                type: 24390
+                id: 24390
             },
             object: {
                 label: "ambition",
-                type: 24391
+                id: 24391
             }
         }
     },
@@ -922,11 +922,11 @@ export const question = [
             },
             predicate: {
                 label: "adapt",
-                type: 24392
+                id: 24392
             },
             object: {
                 label: "my personality",
-                type: 24393
+                id: 24393
             }
         }
     },
@@ -941,11 +941,11 @@ export const question = [
             },
             predicate: {
                 label: "adapt",
-                type: 24392
+                id: 24392
             },
             object: {
                 label: "my behavior",
-                type: 24434
+                id: 24434
             }
         }
     },
@@ -960,11 +960,11 @@ export const question = [
             },
             predicate: {
                 label: "display",
-                type: 24350
+                id: 24350
             },
             object: {
                 label: "adaptability",
-                type: 24395
+                id: 24395
             }
         }
     },
@@ -979,11 +979,11 @@ export const question = [
             },
             predicate: {
                 label: "adjust to",
-                type: 24396
+                id: 24396
             },
             object: {
                 label: "new environments",
-                type: 24397
+                id: 24397
             }
         }
     },
@@ -998,11 +998,11 @@ export const question = [
             },
             predicate: {
                 label: "pursue",
-                type: 24398
+                id: 24398
             },
             object: {
                 label: "growth",
-                type: 24399
+                id: 24399
             }
         }
     },
@@ -1017,11 +1017,11 @@ export const question = [
             },
             predicate: {
                 label: "am satisfied",
-                type: 24400
+                id: 24400
             },
             object: {
                 label: "mastering skills",
-                type: 24401
+                id: 24401
             }
         }
     },
@@ -1036,11 +1036,11 @@ export const question = [
             },
             predicate: {
                 label: "work harder for",
-                type: 24402
+                id: 24402
             },
             object: {
                 label: "reward",
-                type: 24403
+                id: 24403
             }
         }
     },
@@ -1055,11 +1055,11 @@ export const question = [
             },
             predicate: {
                 label: "seek",
-                type: 24376
+                id: 24376
             },
             object: {
                 label: "validation",
-                type: 24404
+                id: 24404
             }
         }
     },
@@ -1074,11 +1074,11 @@ export const question = [
             },
             predicate: {
                 label: "stay motivated by",
-                type: 24405
+                id: 24405
             },
             object: {
                 label: "observation",
-                type: 24406
+                id: 24406
             }
         }
     },
@@ -1093,11 +1093,11 @@ export const question = [
             },
             predicate: {
                 label: "value",
-                type: 24346
+                id: 24346
             },
             object: {
                 label: "external praise",
-                type: 24407
+                id: 24407
             }
         }
     }
