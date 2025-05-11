@@ -11,10 +11,11 @@ export default function Home() {
           Discover Your P9 Archetype
         </h2>
         <p>Scientific. Adaptive. Community-driven personality insights—powered by AI.</p>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 w-full sm:flex-row sm:justify-center sm:items-center">
           <Button
             asChild
             size="lg"
+            className="w-full sm:w-auto"
           >
             <Link
               href="/assessment"
@@ -27,6 +28,7 @@ export default function Home() {
             asChild
             variant="secondary"
             size="lg"
+            className="w-full sm:w-auto"
           >
             <Link
               href="/archetypes"
