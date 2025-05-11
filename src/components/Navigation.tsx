@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import AuthButton from '@/components/SignIn';
+import { useSession, signOut } from "next-auth/react";
 import { Button } from '@/components/ui/Button';
 import {
   Logomark,
@@ -9,9 +9,13 @@ import {
   More,
   Brain,
 } from '@/components/Icons';
-import { ConnectAndSIWE } from './ConnectAndSIWE';
+import { AuthPopup } from './AuthPopup';
+import { useState } from 'react';
 
 export default function Navigation() {
+  const { data: session } = useSession();
+  const [isAuthPopupOpen, setIsAuthPopupOpen] = useState(false);
+
   return (
     <>
       <header className="flex flex-col items-center justify-between py-4 px-2 w-[76px] h-screen fixed top-0 left-0 bg-zinc-900/60 backdrop-blur-md z-50">
@@ -41,9 +45,27 @@ export default function Navigation() {
           </Link>
         </Button>
       </header>
-      <AuthButton />
-      <ConnectAndSIWE />
 
+      {session ? (
+        <Button
+          onClick={() => signOut()}
+          className="fixed right-6 top-6 z-[1]"
+        >
+          Sign out
+        </Button>
+      ) : (
+        <Button
+          onClick={() => setIsAuthPopupOpen(true)}
+          className="fixed right-6 top-6 z-[1]"
+        >
+          Sign in
+        </Button>
+      )}
+
+      <AuthPopup
+        isOpen={isAuthPopupOpen}
+        onClose={() => setIsAuthPopupOpen(false)}
+      />
     </>
   );
-};
+}
