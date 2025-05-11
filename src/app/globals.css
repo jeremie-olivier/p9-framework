@@ -32,9 +32,8 @@ body {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  background-color: rgb(9 9 9);
-  background-image: linear-gradient(rgb(0 0 0/0) 0%,rgb(0 0 0) 50%);
-  color: #9f9fa9;
+  background-color: rgb(16 16 18);
+  color: rgb(159 159 169);
   min-height: 100vh;
   line-height: 21px;
   overflow-y: visible;

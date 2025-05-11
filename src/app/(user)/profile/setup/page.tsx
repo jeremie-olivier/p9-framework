@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
-import { WalletConnect } from "@/components/WalletConnect";
+// import { WalletConnect } from "@/components/WalletConnect";
 
 export default function ProfileSetup() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
 
   // After login, auto-save the run:

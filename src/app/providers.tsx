@@ -25,8 +25,11 @@ export function Providers(props: { children: ReactNode }) {
 
   useEffect(() => {
     const bodyClasses = document.body.classList;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    isHome ? bodyClasses.add('home') : bodyClasses.remove('home');
+    if (isHome) {
+      bodyClasses.add('home');
+    } else {
+      bodyClasses.remove('home');
+    }
   }, [isHome]);
 
   return (

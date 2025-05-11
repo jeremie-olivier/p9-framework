@@ -15,7 +15,7 @@ const defaultAttrs = {
   strokeLinejoin: 'round' as const,
 };
 
-export const IconBase = forwardRef<SVGSVGElement, IconBaseProps>(
+export const BgBase = forwardRef<SVGSVGElement, IconBaseProps>(
   ({
     viewBox = '0 0 24 24',
     width = "24px",
@@ -38,4 +38,7 @@ export const IconBase = forwardRef<SVGSVGElement, IconBaseProps>(
   )
 );
 
-IconBase.displayName = 'IconBase';
+BgBase.displayName = 'BgBase';
+
+
+

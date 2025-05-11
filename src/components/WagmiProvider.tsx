@@ -3,7 +3,8 @@
 import { PropsWithChildren, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider as _WagmiProvider } from 'wagmi';
-
+import { base, mainnet } from 'wagmi/chains';
+import { injected, metaMask, safe } from 'wagmi/connectors';
 
 import { config } from "@/lib/wagmiConfig"
 

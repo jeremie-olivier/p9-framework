@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, getProviders, useSession } from "next-auth/react";
+import type { ClientSafeProvider } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 export default function SignInPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [providers, setProviders] = useState<Record<string, any>>({});
+  const [providers, setProviders] = useState<Record<string, ClientSafeProvider>>({});
 
   // If already logged in, bounce to homepage
   useEffect(() => {
@@ -40,9 +41,8 @@ export default function SignInPage() {
     <div className="bg-[rgb(16,16,16)] rounded-[16px] p-[56px] pt-[48px] min-w-[520px] min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-3xl font-bold mb-6">Sign in to P9 Framework</h1>
 
-      {Object.values(providers).map((prov: any) => (
+      {Object.values(providers).map((prov) => (
         <Button
-          variant="default"
           key={prov.id}
           onClick={() => signIn(prov.id, { callbackUrl: "/" })}
         >

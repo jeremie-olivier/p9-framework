@@ -41,8 +41,8 @@ export async function POST(request: Request) {
       },
     });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    console.error("Error saving label feedback:", err);
+  } catch (err: unknown) {
+    console.error("Error saving label feedback:", err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: "Failed to save feedback" },
       { status: 500 }
