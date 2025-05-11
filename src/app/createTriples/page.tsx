@@ -43,7 +43,7 @@ export default function CreateTriplesPage() {
                 newStatuses[i].createStatus = 'loading'
                 setTripleStatuses([...newStatuses])
 
-                const createResult = await createTriple.writeContractAsync({
+                await createTriple.writeContractAsync({
                     ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
                     functionName: 'createTriple',
                     args: [q.triple.subject.id, q.triple.predicate.type, q.triple.object.type],
@@ -66,7 +66,7 @@ export default function CreateTriplesPage() {
                 newStatuses[i].depositStatus = 'loading'
                 setTripleStatuses([...newStatuses])
 
-                const depositResult = await depositTriple.writeContractAsync({
+                await depositTriple.writeContractAsync({
                     ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
                     functionName: 'depositTriple',
                     args: [tripleId],
