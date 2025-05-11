@@ -47,6 +47,7 @@ export default function CreateTriplesPage() {
                     ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
                     functionName: 'createTriple',
                     args: [q.triple.subject.id, q.triple.predicate.type, q.triple.object.type],
+                    value: BigInt('6900000000000000') // 0.0069 ETH in wei
                 })
 
                 // Wait for transaction receipt
