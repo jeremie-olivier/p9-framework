@@ -12,6 +12,8 @@ export const getMultivaultContractConfig = (contract?: string) => ({
 export function useMultivaultContract(contract?: string, chainId?: number) {
     const publicClient = usePublicClient({ chainId: 84532 })
 
+    console.log('useMultivaultContract', chainId)
+
 
     if (!publicClient) {
         console.error('No publicClient found.')

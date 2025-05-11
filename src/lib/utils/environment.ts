@@ -5,25 +5,15 @@ import { base, baseSepolia, type mainnet } from "viem/chains";
 
 import logger from "@/lib/utils/logger";
 
-const alchemyRpcUrlBaseSepolia =
-  typeof window !== "undefined"
-    ? window.ENV?.ALCHEMY_BASE_SEPOLIA_RPC_URL
-    : process.env.ALCHEMY_BASE_SEPOLIA_RPC_URL;
+const alchemyRpcUrlBaseSepolia = process.env.ALCHEMY_BASE_SEPOLIA_RPC_URL;
 
-const alchemyRpcUrlBaseMainnet =
-  typeof window !== "undefined"
-    ? window.ENV?.ALCHEMY_BASE_RPC_URL
-    : process.env.ALCHEMY_BASE_RPC_URL;
+const alchemyRpcUrlBaseMainnet = process.env.ALCHEMY_BASE_RPC_URL;
 
 const multiVaultContractAddressBaseMainnet =
-  typeof window !== "undefined"
-    ? window.ENV?.MULTIVAULT_ADDRESS_BASE_MAINNET
-    : process.env.MULTIVAULT_ADDRESS_BASE_MAINNET;
+  process.env.MULTIVAULT_ADDRESS_BASE_MAINNET;
 
 const multiVaultContractAddressBaseSepolia =
-  typeof window !== "undefined"
-    ? window.ENV?.MULTIVAULT_ADDRESS_BASE_SEPOLIA
-    : process.env.MULTIVAULT_ADDRESS_BASE_SEPOLIA;
+  process.env.MULTIVAULT_ADDRESS_BASE_SEPOLIA;
 
 type ChainId = typeof base.id | typeof baseSepolia.id | typeof mainnet.id;
 
@@ -43,19 +33,19 @@ export const getChainEnvConfig = (env: string): ChainConfig => {
     development: {
       chainId: baseSepolia.id,
       name: baseSepolia.name,
-      alchemyRpcUrl: alchemyRpcUrlBaseSepolia,
+      alchemyRpcUrl: alchemyRpcUrlBaseSepolia ? alchemyRpcUrlBaseSepolia : "",
       contractAddress: multiVaultContractAddressBaseSepolia as Address,
     },
     staging: {
       chainId: base.id,
       name: base.name,
-      alchemyRpcUrl: alchemyRpcUrlBaseMainnet,
+      alchemyRpcUrl: alchemyRpcUrlBaseMainnet ? alchemyRpcUrlBaseMainnet : "",
       contractAddress: multiVaultContractAddressBaseMainnet as Address,
     },
     production: {
       chainId: base.id,
       name: base.name,
-      alchemyRpcUrl: alchemyRpcUrlBaseMainnet,
+      alchemyRpcUrl: alchemyRpcUrlBaseMainnet ? alchemyRpcUrlBaseMainnet : "",
       contractAddress: multiVaultContractAddressBaseMainnet as Address,
     },
   };

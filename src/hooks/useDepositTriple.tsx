@@ -1,6 +1,5 @@
 import type { GetContractReturnType } from 'viem'
 
-import { getChainEnvConfig } from '@/lib/utils/environment'
 import { useContractWriteAndWait } from '@/hooks/useContractWriteAndWait'
 import { useMultivaultContract } from '@/hooks/useMultivaultContract'
 

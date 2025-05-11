@@ -1,4 +1,4 @@
-let question = [
+export const question = [
     {
         id: 1,
         question: "I rarely manipulate others to achieve my goals.",

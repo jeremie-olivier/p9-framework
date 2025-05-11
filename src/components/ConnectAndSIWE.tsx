@@ -45,11 +45,11 @@ export function ConnectAndSIWE() {
                 signature,
             })
             .then((v) => setValid(v));
-    }, [signature, account]);
+    }, [signature, account, client, message]);
 
     useEffect(() => {
         checkValid();
-    }, [signature, account]);
+    }, [signature, account, checkValid]);
 
     useEffect(() => { });
 

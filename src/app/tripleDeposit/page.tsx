@@ -8,6 +8,7 @@ import { MULTIVAULT_CONTRACT_ADDRESS, BLOCK_EXPLORER_URL } from '@/consts'
 import { useDepositTriple } from '@/hooks/useDepositTriple'
 import { multivaultAbi } from '@/lib/abis/multivault'
 import { useChainId } from 'wagmi'
+import { baseSepolia } from 'viem/chains'
 
 export default function TripleDepositPage() {
     const { address } = useAccount()
@@ -65,7 +66,7 @@ export default function TripleDepositPage() {
                 functionName: 'depositTriple',
                 args: [address as `0x${string}`, BigInt(tripleId)],
                 value: parsedAmount,
-                chain: 84532
+                chain: baseSepolia
                 // Remove chainId parameter to let the wallet use its current chain
             })
 
@@ -97,7 +98,7 @@ export default function TripleDepositPage() {
                     <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-700 rounded-md text-yellow-500 text-sm">
                         <p className="font-bold">Network Warning</p>
                         <p>This app is designed for the Base Sepolia network (Chain ID: 84532).</p>
-                        <p className="mt-1">Current network: {currentChainId === 1 ? 'Ethereum Mainnet' : `Chain ID: ${currentChainId}`}</p>
+                        <p className="mt-1">Current network:  `Chain ID: ${currentChainId}`</p>
                         <p className="mt-2">You may attempt to deposit on your current network, but it might not work as expected.</p>
                     </div>
                 )}
