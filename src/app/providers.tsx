@@ -7,6 +7,7 @@ import { WagmiProvider } from 'wagmi';
 import { Toaster } from "sonner";
 
 import { config } from "@/lib/wagmiConfig"
+import "@/lib/graphql"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
