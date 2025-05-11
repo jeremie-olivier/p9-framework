@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card'
 import { MULTIVAULT_CONTRACT_ADDRESS } from '@/consts'
 import { getMultivaultContractConfig } from '@/hooks/useMultivaultContract'
 import type { TransactionReceipt } from 'viem'
+import { useAccount } from 'wagmi'
 
 interface TripleStatus {
     id: number
@@ -20,6 +21,7 @@ interface TripleStatus {
 }
 
 export default function CreateTriplesPage() {
+    const { address } = useAccount()
     const [tripleStatuses, setTripleStatuses] = useState<TripleStatus[]>(
         question.map((q) => ({
             id: q.id,
@@ -33,6 +35,11 @@ export default function CreateTriplesPage() {
     const depositTriple = useDepositTriple(MULTIVAULT_CONTRACT_ADDRESS)
 
     const processAllTriples = async () => {
+        if (!address) {
+            alert('Please connect your wallet first')
+            return
+        }
+
         setIsProcessing(true)
         const newStatuses = [...tripleStatuses]
 
@@ -47,7 +54,8 @@ export default function CreateTriplesPage() {
                     ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
                     functionName: 'createTriple',
                     args: [q.triple.subject.id, q.triple.predicate.type, q.triple.object.type],
-                    value: BigInt('6900000000000000') // 0.0069 ETH in wei
+                    value: BigInt('690000000000000'), // 0.00069 ETH in wei
+                    chainId: 84532 // Base Sepolia chain ID
                 })
 
                 // Wait for transaction receipt
@@ -70,7 +78,8 @@ export default function CreateTriplesPage() {
                 await depositTriple.writeContractAsync({
                     ...getMultivaultContractConfig(MULTIVAULT_CONTRACT_ADDRESS),
                     functionName: 'depositTriple',
-                    args: [tripleId],
+                    args: [address, tripleId], // Use user's address as receiver
+                    value: BigInt('690000000000000') // 0.00069 ETH in wei
                 })
 
                 // Wait for transaction receipt
