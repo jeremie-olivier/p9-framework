@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { track } from "@vercel/analytics";
 import Question from "./components/Question";
 import { questions } from "./components/questions";
+import DynamicGraph from "../components/ForceGraph3D";
 
 const ANIM = { duration: 0.3 };
 const STORAGE_ANS = "p9_answers";
@@ -113,6 +114,10 @@ export default function Assessment() {
           {formError}
         </p>
       )}
+
+      <div className="mb-8 h-[200px] w-full relative overflow-hidden rounded-lg">
+        <DynamicGraph />
+      </div>
 
       <AnimatePresence initial={false}>
         {visible
