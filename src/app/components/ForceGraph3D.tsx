@@ -258,7 +258,6 @@ export default function DynamicGraph({ width, height }: DynamicGraphProps) {
           backgroundColor="#000000"
           onEngineStop={() => console.log('Engine stopped')}
           showNavInfo={false}
-          cameraPosition={{ z: 600 }}
         />
       ) : (
         <div style={{ color: 'white', padding: '20px' }}>

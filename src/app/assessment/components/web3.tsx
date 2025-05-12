@@ -36,7 +36,6 @@ export default function Web3Assessment() {
     const { containerRef, dimensions } = useContainerSize();
     const {
         writeContractAsync,
-        receipt,
         awaitingWalletConfirmation,
         awaitingOnChainConfirmation,
         onReceipt
