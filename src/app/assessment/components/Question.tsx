@@ -1,42 +1,75 @@
 "use client";
 
 import React from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 
-interface QuestionProps {
+export interface QuestionProps {
   id: string;
   text: string;
-  value: number;
+  value: number; // 0 = no answer yet
   onChange: (id: string, value: number) => void;
   isLoading?: boolean;
   isSuccess?: boolean;
 }
 
-export default function Question({ id, text, value, onChange, isLoading, isSuccess }: QuestionProps) {
+const ticks = [
+  { value: 1, label: "Strongly Disagree" },
+  { value: 2, label: "Disagree" },
+  { value: 3, label: "Slightly Disagree" },
+  { value: 4, label: "Neutral" },
+  { value: 5, label: "Slightly Agree" },
+  { value: 6, label: "Agree" },
+  { value: 7, label: "Strongly Agree" },
+];
+
+export default function Question({
+  id,
+  text,
+  value,
+  onChange,
+  isLoading,
+  isSuccess,
+}: QuestionProps) {
+  // Treat 0 as "no selection"
+  const selected = value > 0 ? String(value) : undefined;
+
   return (
-    <div className="mb-4">
-      <p className="mb-2">{text}</p>
-      <div className="flex gap-4">
-        {[1, 2, 3, 4, 5].map((v) => (
-          <label key={v} className="flex items-center">
-            <input
-              type="radio"
-              name={id}
-              value={v}
-              checked={value === v}
-              onChange={() => onChange(id, v)}
-              disabled={isLoading}
-              className={`mr-1 ${isLoading ? 'opacity-50' : ''} ${isSuccess ? 'accent-green-500' : ''}`}
-            />
-            {isLoading && value === v && (
-              <div className="ml-1 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            )}
-            {isSuccess && value === v && (
-              <span className="ml-1 text-green-500">✓</span>
-            )}
-            {v}
-          </label>
-        ))}
-      </div>
+    <div className="mb-8">
+      <fieldset>
+        <legend id={`${id}-legend`} className="block mb-2 font-medium">
+          {text}
+        </legend>
+
+        <RadioGroup
+          name={id}
+          value={selected}
+          onValueChange={(val) => onChange(id, Number(val))}
+          className="grid grid-cols-7 gap-2"
+          required
+          aria-labelledby={`${id}-legend`}
+        >
+          {ticks.map((t) => (
+            <label
+              key={t.value}
+              htmlFor={`${id}-${t.value}`}
+              className="flex flex-col items-center cursor-pointer"
+            >
+              <RadioGroupItem
+                id={`${id}-${t.value}`}
+                value={String(t.value)}
+                disabled={isLoading}
+                className={isSuccess ? 'accent-green-500' : ''}
+              />
+              <span className="mt-1 text-[9px] text-gray-500 text-center">
+                {t.label}
+              </span>
+              {isLoading && value === t.value && (
+                <div className="mt-1 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              )}
+            </label>
+          ))}
+        </RadioGroup>
+      </fieldset>
     </div>
   );
 }

@@ -86,6 +86,11 @@ export default function Web3Assessment() {
             setAnswers((prev) => ({ ...prev, [id]: value }));
             const idx = questions.findIndex((q) => q.id === id);
 
+            // Advance to next question immediately
+            if (idx === currentIndex && currentIndex < total - 1) {
+                setCurrentIndex(idx + 1);
+            }
+
             // Update transaction status to pending
             setTransactionStatuses(prev => ({
                 ...prev,
@@ -131,10 +136,6 @@ export default function Web3Assessment() {
                 } else {
                     setFormError(`An unknown error occurred: ${JSON.stringify(err)}`);
                 }
-            }
-
-            if (idx === currentIndex && currentIndex < total - 1) {
-                setCurrentIndex(idx + 1);
             }
         },
         [currentIndex, total, writeContractAsync, address, currentChainId, onReceipt]
@@ -213,18 +214,6 @@ export default function Web3Assessment() {
                 <p className="mb-4 text-red-600" role="alert">
                     {formError}
                 </p>
-            )}
-
-            {awaitingWalletConfirmation && (
-                <div className="p-2 text-yellow-500 text-sm">
-                    Please confirm the transaction in your wallet...
-                </div>
-            )}
-
-            {awaitingOnChainConfirmation && (
-                <div className="p-2 text-yellow-500 text-sm">
-                    Transaction submitted, waiting for confirmation...
-                </div>
             )}
 
             <div className="mb-8 h-[200px] w-full relative overflow-hidden rounded-lg">
