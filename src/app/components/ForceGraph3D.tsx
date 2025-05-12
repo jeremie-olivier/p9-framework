@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useSubscription } from '@apollo/client';
 import gql from 'graphql-tag';
-
+import { useAccount } from 'wagmi';
 
 interface ForceGraph3DInstance {
   cameraPosition: (pos: { x?: number; y?: number; z?: number }) => void;
@@ -88,9 +88,9 @@ const CLAIMS_SUBSCRIPTION = gql`
 `;
 
 export default function DynamicGraph({ width, height }: DynamicGraphProps) {
-
   const containerRef = useRef<HTMLDivElement>(null);
   const fgRef = useRef<ForceGraph3DInstance | null>(null);
+  const { address } = useAccount();
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const nodeMapRef = useRef<Map<string, Node>>(new Map());
   const [isGraphLoaded, setIsGraphLoaded] = useState(false);
@@ -122,7 +122,7 @@ export default function DynamicGraph({ width, height }: DynamicGraphProps) {
     variables: {
       where: {
         account_id: {
-          _eq: "0x25d5c9dbc1e12163b973261a08739927e4f72ba8"
+          _eq: address?.toLowerCase() || ''
         }
       }
     }
