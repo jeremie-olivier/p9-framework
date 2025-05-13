@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useCallback, useEffect, startTransition } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
@@ -42,8 +43,6 @@ export default function Web3Assessment() {
     const { containerRef, dimensions } = useContainerSize();
     const {
         writeContractAsync,
-        awaitingWalletConfirmation,
-        awaitingOnChainConfirmation,
         onReceipt
     } = useDepositTriple(MULTIVAULT_CONTRACT_ADDRESS);
 
