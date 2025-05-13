@@ -10,6 +10,7 @@ export interface QuestionProps {
   onChange: (id: string, value: number) => void;
   isLoading?: boolean;
   isSuccess?: boolean;
+  explorerButton?: React.ReactNode;
 }
 
 const ticks = [
@@ -29,6 +30,7 @@ export default function Question({
   onChange,
   isLoading,
   isSuccess,
+  explorerButton,
 }: QuestionProps) {
   // Treat 0 as "no selection"
   const selected = value > 0 ? String(value) : undefined;
@@ -37,7 +39,10 @@ export default function Question({
     <div className="mb-8">
       <fieldset>
         <legend id={`${id}-legend`} className="block mb-2 font-medium">
-          {text}
+          <div className="flex items-center gap-2">
+            {text}
+            {explorerButton}
+          </div>
         </legend>
 
         <RadioGroup
@@ -54,18 +59,20 @@ export default function Question({
               htmlFor={`${id}-${t.value}`}
               className="flex flex-col items-center cursor-pointer"
             >
-              <RadioGroupItem
-                id={`${id}-${t.value}`}
-                value={String(t.value)}
-                disabled={isLoading}
-                className={isSuccess ? 'accent-green-500' : ''}
-              />
+              {isSuccess && value === t.value ? (
+                <div className="w-5 h-5 bg-green-500 rounded-full border-2 border-green-500" />
+              ) : isLoading && value === t.value ? (
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <RadioGroupItem
+                  id={`${id}-${t.value}`}
+                  value={String(t.value)}
+                  disabled={isLoading}
+                />
+              )}
               <span className="mt-1 text-[9px] text-gray-500 text-center">
                 {t.label}
               </span>
-              {isLoading && value === t.value && (
-                <div className="mt-1 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              )}
             </label>
           ))}
         </RadioGroup>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
@@ -16,6 +16,7 @@ import { parseUnits } from 'viem';
 import { Abi } from 'viem';
 import { multivaultAbi } from '@/lib/abis/multivault';
 import { baseSepolia } from 'viem/chains';
+import { flushSync } from "react-dom";
 
 const ANIM = { duration: 0.3 };
 const STORAGE_ANS = "p9_answers_web3";
@@ -26,6 +27,11 @@ interface TransactionStatus {
     questionId: string;
     status: 'pending' | 'success' | 'error';
     txHash?: string;
+}
+
+interface PendingTransaction {
+    questionId: string;
+    tripleId: number;
 }
 
 export default function Web3Assessment() {
@@ -46,6 +52,62 @@ export default function Web3Assessment() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [transactionStatuses, setTransactionStatuses] = useState<Record<string, TransactionStatus>>({});
+    const [pendingTransactions, setPendingTransactions] = useState<PendingTransaction[]>([]);
+    const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+
+    // Process transaction queue
+    useEffect(() => {
+        const processQueue = async () => {
+            if (isProcessingQueue || pendingTransactions.length === 0 || !address) return;
+
+            setIsProcessingQueue(true);
+            const currentTx = pendingTransactions[0];
+
+            try {
+                const hash = await writeContractAsync({
+                    address: MULTIVAULT_CONTRACT_ADDRESS as `0x${string}`,
+                    abi: multivaultAbi as Abi,
+                    functionName: 'depositTriple',
+                    args: [address as `0x${string}`, BigInt(currentTx.tripleId)],
+                    value: parseUnits('0.001', 18),
+                    chain: baseSepolia
+                });
+
+                setTransactionStatuses(prev => ({
+                    ...prev,
+                    [currentTx.questionId]: {
+                        questionId: currentTx.questionId,
+                        status: 'success',
+                        txHash: hash
+                    }
+                }));
+
+                onReceipt((receipt) => {
+                    console.log('Transaction confirmed:', receipt);
+                });
+            } catch (err) {
+                setTransactionStatuses(prev => ({
+                    ...prev,
+                    [currentTx.questionId]: {
+                        questionId: currentTx.questionId,
+                        status: 'error'
+                    }
+                }));
+                console.error('Error depositing triple:', err);
+                if (err instanceof Error) {
+                    setFormError(`Error: ${err.message}${err.cause ? ` (Cause: ${JSON.stringify(err.cause)})` : ''}`);
+                } else {
+                    setFormError(`An unknown error occurred: ${JSON.stringify(err)}`);
+                }
+            }
+
+            // Remove processed transaction from queue
+            setPendingTransactions(prev => prev.slice(1));
+            setIsProcessingQueue(false);
+        };
+
+        processQueue();
+    }, [pendingTransactions, isProcessingQueue, address, writeContractAsync, onReceipt]);
 
     // Hydrate once on mount (fire-and-forget)
     useEffect(() => {
@@ -78,7 +140,6 @@ export default function Web3Assessment() {
                 return;
             }
 
-            // Show a warning if not on Base Sepolia, but allow the transaction to proceed
             if (currentChainId !== 84532) {
                 console.warn(`User is on chain ${currentChainId} instead of Base Sepolia (84532)`);
             }
@@ -86,59 +147,29 @@ export default function Web3Assessment() {
             setAnswers((prev) => ({ ...prev, [id]: value }));
             const idx = questions.findIndex((q) => q.id === id);
 
-            // Advance to next question immediately
+            // Advance to next question immediately, synchronously
             if (idx === currentIndex && currentIndex < total - 1) {
-                setCurrentIndex(idx + 1);
+                flushSync(() => {
+                    setCurrentIndex(idx + 1);
+                });
             }
 
-            // Update transaction status to pending
-            setTransactionStatuses(prev => ({
-                ...prev,
-                [id]: { questionId: id, status: 'pending' }
-            }));
+            // Add transaction to queue
+            const question = questions.find(q => q.id === id);
+            if (question?.triple) {
+                setPendingTransactions(prev => [...prev, {
+                    questionId: id,
+                    tripleId: question.triple.id
+                }]);
 
-            try {
-                const question = questions.find(q => q.id === id);
-                if (question?.triple) {
-                    const hash = await writeContractAsync({
-                        address: MULTIVAULT_CONTRACT_ADDRESS as `0x${string}`,
-                        abi: multivaultAbi as Abi,
-                        functionName: 'depositTriple',
-                        args: [address as `0x${string}`, BigInt(question.triple.id)],
-                        value: parseUnits('0.001', 18),
-                        chain: baseSepolia
-                    });
-
-                    // Update transaction status to success with hash
-                    setTransactionStatuses(prev => ({
-                        ...prev,
-                        [id]: {
-                            questionId: id,
-                            status: 'success',
-                            txHash: hash
-                        }
-                    }));
-
-                    // Set up receipt handler
-                    onReceipt((receipt) => {
-                        console.log('Transaction confirmed:', receipt);
-                    });
-                }
-            } catch (err) {
-                // Update transaction status to error
+                // Set initial pending status
                 setTransactionStatuses(prev => ({
                     ...prev,
-                    [id]: { questionId: id, status: 'error' }
+                    [id]: { questionId: id, status: 'pending' }
                 }));
-                console.error('Error depositing triple:', err);
-                if (err instanceof Error) {
-                    setFormError(`Error: ${err.message}${err.cause ? ` (Cause: ${JSON.stringify(err.cause)})` : ''}`);
-                } else {
-                    setFormError(`An unknown error occurred: ${JSON.stringify(err)}`);
-                }
             }
         },
-        [currentIndex, total, writeContractAsync, address, currentChainId, onReceipt]
+        [currentIndex, total, address, currentChainId]
     );
 
     const handleSubmit = useCallback(
@@ -255,19 +286,25 @@ export default function Web3Assessment() {
                                     text={q.text}
                                     value={answers[q.id] ?? 0}
                                     onChange={handleAnswerChange}
-                                    isLoading={txStatus?.status === 'pending' || awaitingWalletConfirmation || awaitingOnChainConfirmation}
+                                    isLoading={txStatus?.status === 'pending'}
                                     isSuccess={txStatus?.status === 'success'}
+                                    explorerButton={
+                                        txStatus?.status === 'success' && txStatus.txHash && (
+                                            <button
+                                                type="button"
+                                                className="flex items-center gap-1 px-2 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition text-xs"
+                                                onClick={() => window.open(`${BLOCK_EXPLORER_URL}/tx/${txStatus.txHash}`, '_blank')}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link" viewBox="0 0 24 24">
+                                                    <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                                    <polyline points="15 3 21 3 21 9" />
+                                                    <line x1="10" x2="21" y1="14" y2="3" />
+                                                </svg>
+                                                Explorer
+                                            </button>
+                                        )
+                                    }
                                 />
-                                {txStatus?.status === 'success' && txStatus.txHash && (
-                                    <a
-                                        href={`${BLOCK_EXPLORER_URL}/tx/${txStatus.txHash}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-800"
-                                    >
-                                        View Transaction
-                                    </a>
-                                )}
                             </motion.div>
                         );
                     })}
