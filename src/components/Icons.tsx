@@ -1,8 +1,6 @@
 import { memo, forwardRef, SVGProps } from 'react';
 import { IconBase } from '@/components/ui/IconBase';
 
-type IconProps = SVGProps<SVGSVGElement>;
-
 export function Logomark(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
